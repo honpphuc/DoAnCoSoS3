@@ -1,0 +1,282 @@
+<%- include('partials/head') %>
+<div class="flex">
+    <%- include('partials/sidebar') %>
+    <main class="lg:ml-64 flex-1 min-h-screen p-8 bg-slate-50/50">
+        <header class="mb-8">
+            <h2 class="text-3xl font-extrabold text-slate-900">Cài đặt tài khoản</h2>
+            <p class="text-slate-500 mt-1">Quản lý thông tin cá nhân và bảo mật.</p>
+        </header>
+
+        <!-- Thông báo kết quả -->
+        <div id="toast" class="hidden fixed top-6 right-6 z-50 px-5 py-3 rounded-2xl text-white text-sm font-bold shadow-xl transition-all"></div>
+
+        <div class="grid grid-cols-12 gap-8">
+            <!-- LEFT: Profile + Password -->
+            <div class="col-span-12 xl:col-span-8 space-y-6">
+
+                <!-- Thông tin cá nhân -->
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                            <i class="fa-regular fa-id-card"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Thông tin cá nhân</h3>
+                            <p class="text-sm text-slate-500">Cập nhật tên hiển thị và mô tả ngắn.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="space-y-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Họ và tên</span>
+                            <input id="fullName" type="text" value="<%= profile?.full_name || '' %>"
+                                   placeholder="Nhập họ và tên"
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-primary outline-none text-sm">
+                        </label>
+                        <label class="space-y-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Email</span>
+                            <input type="email" value="<%= user?.email || '' %>" disabled
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 text-slate-400 outline-none text-sm cursor-not-allowed">
+                        </label>
+                        <label class="space-y-2 md:col-span-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Giới thiệu ngắn</span>
+                            <input id="headline" type="text" value="<%= profile?.headline || '' %>"
+                                   placeholder="VD: Sinh viên CNTT tại Đại học ABC"
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-primary outline-none text-sm">
+                        </label>
+                    </div>
+                    <div class="flex gap-3 mt-6">
+                        <button onclick="saveProfile()"
+                                class="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-teal-700 transition-colors">
+                            Lưu thay đổi
+                        </button>
+                        <button onclick="resetProfile()"
+                                class="px-6 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors">
+                            Khôi phục
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Đổi mật khẩu -->
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Đổi mật khẩu</h3>
+                            <p class="text-sm text-slate-500">Mật khẩu tối thiểu 6 ký tự.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <label class="space-y-2 block">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Mật khẩu mới</span>
+                            <div class="relative">
+                                <input id="newPassword" type="password" placeholder="Nhập mật khẩu mới"
+                                       class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-primary outline-none text-sm pr-10">
+                                <button type="button" onclick="togglePwd('newPassword', this)" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </label>
+                        <label class="space-y-2 block">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Xác nhận mật khẩu</span>
+                            <div class="relative">
+                                <input id="confirmPassword" type="password" placeholder="Nhập lại mật khẩu"
+                                       class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-primary outline-none text-sm pr-10">
+                                <button type="button" onclick="togglePwd('confirmPassword', this)" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="pwdStrength" class="mt-3 hidden">
+                        <div class="flex gap-1 mb-1">
+                            <div id="s1" class="h-1.5 flex-1 rounded-full bg-slate-200"></div>
+                            <div id="s2" class="h-1.5 flex-1 rounded-full bg-slate-200"></div>
+                            <div id="s3" class="h-1.5 flex-1 rounded-full bg-slate-200"></div>
+                        </div>
+                        <p id="pwdStrengthLabel" class="text-xs text-slate-400"></p>
+                    </div>
+                    <button onclick="changePassword()"
+                            class="mt-6 px-6 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-colors">
+                        Đổi mật khẩu
+                    </button>
+                </div>
+
+                <!-- Lộ trình học tập -->
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Lộ trình học tập</h3>
+                            <p class="text-sm text-slate-500">Mục tiêu và trình độ hiện tại của bạn.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <p class="text-xs font-bold text-slate-400 uppercase mb-1">Mục tiêu</p>
+                            <% const goalLabels = { programming: 'Lập trình', ielts: 'IELTS / Tiếng Anh', design: 'Thiết kế UI/UX', data: 'Data / AI' }; %>
+                            <p class="font-bold text-slate-800"><%= goalLabels[profile?.goal] || profile?.goal || 'Chưa đặt' %></p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <p class="text-xs font-bold text-slate-400 uppercase mb-1">Trình độ</p>
+                            <% const levelLabels = { beginner: 'Mới bắt đầu', intermediate: 'Trung cấp', advanced: 'Nâng cao' }; %>
+                            <p class="font-bold text-slate-800"><%= levelLabels[profile?.level] || profile?.level || 'Chưa đặt' %></p>
+                        </div>
+                        <% if (profile?.hours_per_day) { %>
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <p class="text-xs font-bold text-slate-400 uppercase mb-1">Thời gian học/ngày</p>
+                            <p class="font-bold text-slate-800"><%= profile.hours_per_day %> phút</p>
+                        </div>
+                        <% } %>
+                    </div>
+                    <a href="/onboarding" class="inline-block mt-4 text-sm font-bold text-primary hover:underline">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Tạo lại lộ trình mới
+                    </a>
+                </div>
+            </div>
+
+            <!-- RIGHT: Avatar + Thông tin nhanh -->
+            <div class="col-span-12 xl:col-span-4 space-y-6">
+                <!-- Avatar card -->
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 text-center">
+                    <div class="relative inline-block mb-4">
+                        <img src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(profile?.full_name || user?.email || 'U') %>&background=0D7C8A&color=fff&size=128"
+                             class="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-md" alt="Avatar" id="avatarImg">
+                    </div>
+                    <p class="font-bold text-lg" id="avatarName"><%= profile?.full_name || user?.email || 'Người dùng' %></p>
+                    <p class="text-sm text-slate-500" id="avatarHeadline"><%= profile?.headline || 'Chưa có giới thiệu' %></p>
+                    <p class="text-xs text-slate-400 mt-1"><%= user?.email %></p>
+                </div>
+
+                <!-- Tài khoản -->
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                    <h3 class="font-bold mb-4">Tài khoản</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm p-3 rounded-xl bg-slate-50">
+                            <span class="text-slate-500">Trạng thái</span>
+                            <span class="font-bold text-teal-600">Hoạt động</span>
+                        </div>
+                        <div class="flex justify-between text-sm p-3 rounded-xl bg-slate-50">
+                            <span class="text-slate-500">Loại tài khoản</span>
+                            <span class="font-bold">Miễn phí</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vùng nguy hiểm -->
+                <div class="bg-white rounded-3xl border border-red-100 shadow-sm p-6">
+                    <h3 class="font-bold text-red-500 mb-4">Vùng nguy hiểm</h3>
+                    <button onclick="confirmLogout()"
+                            class="w-full p-3 rounded-xl border border-red-100 text-red-500 text-sm font-bold hover:bg-red-50 transition-colors mb-2">
+                        <i class="fa-solid fa-right-from-bracket mr-2"></i> Đăng xuất
+                    </button>
+                    <button onclick="confirmDeleteRoadmap()"
+                            class="w-full p-3 rounded-xl border border-red-100 text-red-400 text-sm font-semibold hover:bg-red-50 transition-colors">
+                        <i class="fa-solid fa-trash mr-2"></i> Xóa lộ trình hiện tại
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('partials/footer', { withSidebar: true }) %>
+<script>
+const originalName = '<%= (profile?.full_name || "").replace(/'/g, "\\'") %>';
+const originalHeadline = '<%= (profile?.headline || "").replace(/'/g, "\\'") %>';
+
+function showToast(msg, ok = true) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `fixed top-6 right-6 z-50 px-5 py-3 rounded-2xl text-white text-sm font-bold shadow-xl transition-all ${ok ? 'bg-teal-500' : 'bg-red-500'}`;
+    t.classList.remove('hidden');
+    setTimeout(() => t.classList.add('hidden'), 3000);
+}
+
+async function saveProfile() {
+    const full_name = document.getElementById('fullName').value.trim();
+    const headline = document.getElementById('headline').value.trim();
+    if (!full_name) { showToast('Tên không được để trống!', false); return; }
+    try {
+        const res = await fetch('/api/settings/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ full_name, headline }),
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Đã lưu thông tin!');
+            document.getElementById('avatarName').textContent = full_name;
+            document.getElementById('avatarHeadline').textContent = headline || 'Chưa có giới thiệu';
+            document.getElementById('avatarImg').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(full_name)}&background=0D7C8A&color=fff&size=128`;
+        } else {
+            showToast(data.error || 'Lỗi lưu thông tin', false);
+        }
+    } catch { showToast('Lỗi kết nối', false); }
+}
+
+function resetProfile() {
+    document.getElementById('fullName').value = originalName;
+    document.getElementById('headline').value = originalHeadline;
+    showToast('Đã khôi phục thông tin gốc');
+}
+
+document.getElementById('newPassword').addEventListener('input', function () {
+    const val = this.value;
+    const strength = document.getElementById('pwdStrength');
+    if (!val) { strength.classList.add('hidden'); return; }
+    strength.classList.remove('hidden');
+    const s = val.length >= 12 ? 3 : val.length >= 8 ? 2 : 1;
+    const colors = ['bg-red-400', 'bg-amber-400', 'bg-teal-500'];
+    const labels = ['Yếu', 'Trung bình', 'Mạnh'];
+    [1,2,3].forEach(i => {
+        const el = document.getElementById('s'+i);
+        el.className = `h-1.5 flex-1 rounded-full ${i <= s ? colors[s-1] : 'bg-slate-200'}`;
+    });
+    document.getElementById('pwdStrengthLabel').textContent = 'Độ mạnh: ' + labels[s-1];
+});
+
+function togglePwd(id, btn) {
+    const input = document.getElementById(id);
+    const isText = input.type === 'text';
+    input.type = isText ? 'password' : 'text';
+    btn.innerHTML = isText ? '<i class="fa-regular fa-eye"></i>' : '<i class="fa-regular fa-eye-slash"></i>';
+}
+
+async function changePassword() {
+    const new_password = document.getElementById('newPassword').value;
+    const confirm_password = document.getElementById('confirmPassword').value;
+    if (!new_password) { showToast('Nhập mật khẩu mới!', false); return; }
+    if (new_password !== confirm_password) { showToast('Mật khẩu xác nhận không khớp!', false); return; }
+    try {
+        const res = await fetch('/api/settings/password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ new_password, confirm_password }),
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Đã đổi mật khẩu thành công!');
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('pwdStrength').classList.add('hidden');
+        } else {
+            showToast(data.error || 'Lỗi đổi mật khẩu', false);
+        }
+    } catch { showToast('Lỗi kết nối', false); }
+}
+
+function confirmLogout() {
+    if (confirm('Bạn có chắc muốn đăng xuất không?')) window.location.href = '/logout';
+}
+
+function confirmDeleteRoadmap() {
+    if (confirm('Xóa lộ trình sẽ mất toàn bộ tiến độ. Bạn chắc chưa?')) {
+        showToast('Tính năng đang phát triển...', false);
+    }
+}
+</script>
+</body>
+</html>

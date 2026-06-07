@@ -1,0 +1,188 @@
+<%- include('partials/head') %>
+<div class="flex">
+    <%- include('partials/sidebar') %>
+    <main class="lg:ml-64 flex-1 p-10 bg-slate-50/50">
+        <div class="max-w-6xl mx-auto grid grid-cols-3 gap-8">
+            <!-- Left Col: User Card -->
+            <div class="col-span-1 space-y-6">
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary to-teal-400"></div>
+                    <div class="relative z-10">
+                        <img src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(profile?.full_name || user?.email || 'User') %>&background=0D7C8A&color=fff&size=256"
+                             class="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-md mb-4 mt-4" alt="Ảnh đại diện">
+                        <h3 class="text-2xl font-black text-slate-800"><%= profile?.full_name || user?.email || 'Người dùng' %></h3>
+                        <p class="text-slate-500 font-medium"><%= profile?.headline || user?.email || '' %></p>
+                        <div class="mt-4 flex justify-center gap-2 flex-wrap">
+                            <% const goalLabels = { programming: 'Lập trình', ielts: 'IELTS', design: 'Thiết kế', data: 'Data/AI' }; %>
+                            <% if (profile?.goal) { %>
+                            <span class="bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 rounded-full">
+                                <%= goalLabels[profile.goal] || profile.goal %>
+                            </span>
+                            <% } %>
+                            <% const levelLabels = { beginner: 'Mới bắt đầu', intermediate: 'Trung cấp', advanced: 'Nâng cao' }; %>
+                            <% if (profile?.level) { %>
+                            <span class="bg-orange-100 text-orange-600 text-[10px] font-bold px-3 py-1 rounded-full">
+                                <%= levelLabels[profile.level] || profile.level %>
+                            </span>
+                            <% } %>
+                        </div>
+                        <div class="mt-8 grid grid-cols-3 gap-2 border-t border-slate-50 pt-6">
+                            <div>
+                                <p class="text-lg font-bold"><%= stats?.done || 0 %></p>
+                                <p class="text-[10px] text-slate-400 uppercase font-bold">Bài xong</p>
+                            </div>
+                            <div>
+                                <p class="text-lg font-bold"><%= stats?.total || 0 %></p>
+                                <p class="text-[10px] text-slate-400 uppercase font-bold">Tổng bài</p>
+                            </div>
+                            <div>
+                                <p class="text-lg font-bold text-primary"><%= stats?.percent || 0 %>%</p>
+                                <p class="text-[10px] text-slate-400 uppercase font-bold">Tiến độ</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roadmap info card -->
+                <% if (roadmap?.title) { %>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Lộ trình hiện tại</p>
+                    <p class="font-bold text-slate-800"><%= roadmap.title %></p>
+                    <% if (roadmap.total_weeks) { %>
+                    <p class="text-sm text-slate-500 mt-1"><%= roadmap.total_weeks %> tuần học</p>
+                    <% } %>
+                    <div class="mt-3 w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div class="bg-primary h-full rounded-full" style="width: <%= stats?.percent || 0 %>%"></div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1"><%= stats?.done || 0 %>/<%= stats?.total || 0 %> bài</p>
+                </div>
+                <% } %>
+            </div>
+
+            <!-- Right Col -->
+            <div class="col-span-2 space-y-6">
+                <div id="profileTabs" class="inline-flex bg-white rounded-2xl p-1 border border-slate-200 shadow-sm">
+                    <button type="button" data-tab="skills" class="px-5 py-2 rounded-xl bg-primary text-white text-sm font-bold">Kỹ năng</button>
+                    <button type="button" data-tab="activity" class="px-5 py-2 rounded-xl text-slate-500 text-sm font-bold">Hoạt động</button>
+                </div>
+
+                <!-- Skills panel — dựa trên goal thật -->
+                <div id="skillsPanel" class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold">Tiến độ học tập</h3>
+                        <a href="/roadmap" class="text-primary text-sm font-bold">Xem lộ trình <i class="fa-solid fa-arrow-trend-up ml-1"></i></a>
+                    </div>
+                    <% if (!stats || stats.total === 0) { %>
+                        <div class="text-center py-8">
+                            <i class="fa-solid fa-book text-4xl text-slate-200 mb-3"></i>
+                            <p class="text-slate-400">Chưa có dữ liệu học tập.</p>
+                            <a href="/onboarding" class="text-primary text-sm font-bold mt-2 inline-block">Tạo lộ trình →</a>
+                        </div>
+                    <% } else { %>
+                    <div class="grid grid-cols-2 gap-8 items-center">
+                        <!-- Progress circle -->
+                        <div class="flex justify-center items-center">
+                            <div class="relative w-44 h-44">
+                                <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
+                                    <circle cx="60" cy="60" r="50" fill="none" stroke="#f1f5f9" stroke-width="10"/>
+                                    <circle cx="60" cy="60" r="50" fill="none" stroke="#0D7C8A" stroke-width="10"
+                                            stroke-dasharray="<%= Math.round((stats.percent||0) * 3.14) %> 314"
+                                            stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span class="text-3xl font-black text-primary"><%= stats.percent || 0 %>%</span>
+                                    <span class="text-xs text-slate-400">hoàn thành</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Stats breakdown -->
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-xs font-bold">Bài đã hoàn thành</span>
+                                    <span class="text-xs text-primary font-bold"><%= stats.done %></span>
+                                </div>
+                                <div class="h-2 bg-slate-100 rounded-full">
+                                    <div class="h-full bg-primary rounded-full" style="width:<%= stats.percent %>%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-xs font-bold">Bài còn lại</span>
+                                    <span class="text-xs text-orange-500 font-bold"><%= stats.total - stats.done %></span>
+                                </div>
+                                <div class="h-2 bg-slate-100 rounded-full">
+                                    <div class="h-full bg-orange-400 rounded-full" style="width:<%= 100 - stats.percent %>%"></div>
+                                </div>
+                            </div>
+                            <% if (roadmap?.total_weeks) { %>
+                            <div class="mt-4 p-3 bg-slate-50 rounded-2xl">
+                                <p class="text-xs text-slate-500">
+                                    <i class="fa-solid fa-calendar text-primary mr-1"></i>
+                                    Lộ trình <strong><%= roadmap.total_weeks %> tuần</strong>
+                                    <% if (profile?.hours_per_day) { %> • <strong><%= profile.hours_per_day %> phút/ngày</strong><% } %>
+                                </p>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <!-- Activity panel -->
+                <div id="activityPanel" class="hidden bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+                    <h3 class="text-lg font-bold mb-4">Hoạt động học tập</h3>
+                    <% if (!stats || stats.total === 0) { %>
+                        <p class="text-slate-400 text-center py-8">Chưa có hoạt động nào.</p>
+                    <% } else { %>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="p-4 bg-teal-50 rounded-2xl border border-teal-100">
+                            <p class="text-xs font-bold text-teal-600 uppercase">Tổng bài hoàn thành</p>
+                            <p class="text-2xl font-black text-teal-800 mt-1"><%= stats.done %></p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Tỉ lệ hoàn thành</p>
+                            <p class="text-2xl font-black mt-1"><%= stats.percent %>%</p>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                        <p class="text-sm font-semibold text-amber-700">
+                            <i class="fa-solid fa-lightbulb mr-2"></i>
+                            <% if (stats.percent >= 80) { %>
+                                Xuất sắc! Bạn đang tiến rất tốt. Hãy duy trì nhịp độ này!
+                            <% } else if (stats.percent >= 50) { %>
+                                Bạn đã hoàn thành hơn nửa lộ trình. Cố lên!
+                            <% } else { %>
+                                Hãy học đều đặn mỗi ngày để đạt mục tiêu đúng hạn.
+                            <% } %>
+                        </p>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('partials/footer', { withSidebar: true }) %>
+<script>
+    (function () {
+        const buttons = Array.from(document.querySelectorAll('#profileTabs [data-tab]'));
+        const skillsPanel = document.querySelector('#skillsPanel');
+        const activityPanel = document.querySelector('#activityPanel');
+
+        function switchTab(tab) {
+            buttons.forEach((btn) => {
+                btn.className = btn.dataset.tab === tab
+                    ? 'px-5 py-2 rounded-xl bg-primary text-white text-sm font-bold'
+                    : 'px-5 py-2 rounded-xl text-slate-500 text-sm font-bold';
+            });
+            skillsPanel.classList.toggle('hidden', tab !== 'skills');
+            activityPanel.classList.toggle('hidden', tab !== 'activity');
+        }
+
+        buttons.forEach((btn) => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+        switchTab('skills');
+    })();
+</script>
+</body>
+</html>

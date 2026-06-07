@@ -1,0 +1,226 @@
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  AI CHATBOX — nhúng vào footer, hiện trên mọi trang -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<!-- Nút mở chatbox -->
+<button id="chatToggleBtn"
+  onclick="toggleChat()"
+  class="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-white shadow-2xl shadow-teal-200 flex items-center justify-center hover:scale-110 transition-all duration-300 group"
+  title="Hỏi AI tư vấn lộ trình">
+  <i id="chatIcon" class="fa-solid fa-comments text-xl"></i>
+  <!-- Badge số tin chưa đọc -->
+  <span id="chatBadge"
+    class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full items-center justify-center hidden">
+    1
+  </span>
+</button>
+
+<!-- Cửa sổ chat -->
+<div id="chatWindow"
+  class="fixed bottom-24 right-6 z-50 w-[360px] max-h-[540px] bg-white rounded-3xl shadow-2xl shadow-slate-200 border border-slate-100 flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right scale-0 opacity-0">
+
+  <!-- Header -->
+  <div class="bg-primary px-5 py-4 flex items-center justify-between flex-shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+        <i class="fa-solid fa-robot text-white text-sm"></i>
+      </div>
+      <div>
+        <p class="font-bold text-white text-sm">Pathfinder AI</p>
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+          <span class="text-[10px] text-teal-100">Đang hoạt động</span>
+        </div>
+      </div>
+    </div>
+    <button onclick="toggleChat()" class="text-white/70 hover:text-white transition-colors">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div id="chatMessages"
+    class="flex-1 overflow-y-auto px-4 py-4 space-y-3 custom-scrollbar"
+    style="max-height: 360px;">
+
+    <!-- Tin chào mặc định -->
+    <div class="flex items-end gap-2">
+      <div class="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <i class="fa-solid fa-robot text-primary text-xs"></i>
+      </div>
+      <div class="bg-slate-50 border border-slate-100 rounded-2xl rounded-bl-sm px-4 py-3 max-w-[80%]">
+        <p class="text-sm text-slate-700">Xin chào! 👋 Tôi là trợ lý AI của Pathfinder. Bạn muốn hỏi về lộ trình học hay cần tôi giải thích bài nào không?</p>
+      </div>
+    </div>
+
+    <!-- Gợi ý câu hỏi nhanh -->
+    <div class="flex flex-wrap gap-2 pl-9">
+      <button onclick="sendQuickMsg('Học gì tiếp theo?')"
+        class="text-[11px] font-bold text-primary border border-primary/30 bg-primary/5 px-3 py-1.5 rounded-full hover:bg-primary hover:text-white transition-all">
+        Học gì tiếp?
+      </button>
+      <button onclick="sendQuickMsg('Tôi đang ở tuần mấy trong lộ trình?')"
+        class="text-[11px] font-bold text-primary border border-primary/30 bg-primary/5 px-3 py-1.5 rounded-full hover:bg-primary hover:text-white transition-all">
+        Tiến độ của tôi
+      </button>
+      <button onclick="sendQuickMsg('Gợi ý tài liệu học hay cho tôi')"
+        class="text-[11px] font-bold text-primary border border-primary/30 bg-primary/5 px-3 py-1.5 rounded-full hover:bg-primary hover:text-white transition-all">
+        Gợi ý tài liệu
+      </button>
+    </div>
+  </div>
+
+  <!-- Typing indicator (ẩn mặc định) -->
+  <div id="typingIndicator" class="hidden px-4 pb-2">
+    <div class="flex items-end gap-2">
+      <div class="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <i class="fa-solid fa-robot text-primary text-xs"></i>
+      </div>
+      <div class="bg-slate-50 border border-slate-100 rounded-2xl rounded-bl-sm px-4 py-3">
+        <div class="flex gap-1 items-center h-4">
+          <span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style="animation-delay:0ms"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style="animation-delay:150ms"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style="animation-delay:300ms"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="border-t border-slate-100 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+    <input
+      id="chatInput"
+      type="text"
+      placeholder="Nhập câu hỏi..."
+      class="flex-1 text-sm bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+      onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendMessage(); }">
+    <button
+      onclick="sendMessage()"
+      id="sendBtn"
+      class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-teal-600 transition-colors flex-shrink-0 disabled:opacity-50"
+      title="Gửi">
+      <i class="fa-solid fa-paper-plane text-sm"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const chatHistory = [];
+const roadmapId   = '<%= typeof roadmapId !== "undefined" ? roadmapId : "" %>';
+const userGoal    = '<%= typeof profile !== "undefined" && profile.goal ? profile.goal : "" %>';
+let   isOpen      = false;
+let   isLoading   = false;
+
+// ── Toggle chatbox ─────────────────────────────────────────────────────────
+function toggleChat() {
+  isOpen = !isOpen;
+  const win  = document.getElementById('chatWindow');
+  const icon = document.getElementById('chatIcon');
+  const badge= document.getElementById('chatBadge');
+
+  if (isOpen) {
+    win.classList.remove('scale-0','opacity-0');
+    win.classList.add('scale-100','opacity-100');
+    icon.className = 'fa-solid fa-xmark text-xl';
+    badge.classList.add('hidden');
+    document.getElementById('chatInput').focus();
+    scrollToBottom();
+  } else {
+    win.classList.add('scale-0','opacity-0');
+    win.classList.remove('scale-100','opacity-100');
+    icon.className = 'fa-solid fa-comments text-xl';
+  }
+}
+
+// ── Scroll xuống cuối ──────────────────────────────────────────────────────
+function scrollToBottom() {
+  const box = document.getElementById('chatMessages');
+  setTimeout(() => { box.scrollTop = box.scrollHeight; }, 50);
+}
+
+// ── Thêm bubble tin nhắn ──────────────────────────────────────────────────
+function appendMessage(text, role) {
+  const box = document.getElementById('chatMessages');
+  const isUser = role === 'user';
+
+  const bubble = document.createElement('div');
+  bubble.className = isUser
+    ? 'flex items-end gap-2 justify-end'
+    : 'flex items-end gap-2';
+
+  // Format text: xuống dòng và in đậm **...**
+  const formatted = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+
+  bubble.innerHTML = isUser
+    ? `<div class="bg-primary text-white rounded-2xl rounded-br-sm px-4 py-3 max-w-[80%] text-sm">${formatted}</div>`
+    : `<div class="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+         <i class="fa-solid fa-robot text-primary text-xs"></i>
+       </div>
+       <div class="bg-slate-50 border border-slate-100 rounded-2xl rounded-bl-sm px-4 py-3 max-w-[80%] text-sm text-slate-700">${formatted}</div>`;
+
+  box.appendChild(bubble);
+  scrollToBottom();
+}
+
+// ── Gửi tin nhắn ──────────────────────────────────────────────────────────
+async function sendMessage() {
+  if (isLoading) return;
+  const input = document.getElementById('chatInput');
+  const msg   = input.value.trim();
+  if (!msg) return;
+
+  input.value = '';
+  appendMessage(msg, 'user');
+  chatHistory.push({ role: 'user', text: msg });
+
+  // Hiện typing indicator
+  isLoading = true;
+  document.getElementById('typingIndicator').classList.remove('hidden');
+  document.getElementById('sendBtn').disabled = true;
+  scrollToBottom();
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: msg,
+        roadmap_id: roadmapId,
+        history: chatHistory.slice(-10), // Chỉ gửi 10 tin gần nhất
+      }),
+    });
+    const data = await res.json();
+    const reply = data.reply || 'Xin lỗi, tôi không hiểu. Bạn có thể hỏi lại không? 😅';
+
+    document.getElementById('typingIndicator').classList.add('hidden');
+    appendMessage(reply, 'ai');
+    chatHistory.push({ role: 'ai', text: reply });
+
+  } catch (err) {
+    document.getElementById('typingIndicator').classList.add('hidden');
+    appendMessage('Kết nối gặp sự cố. Vui lòng thử lại! 🔌', 'ai');
+  } finally {
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+  }
+}
+
+// ── Câu hỏi nhanh ─────────────────────────────────────────────────────────
+function sendQuickMsg(text) {
+  document.getElementById('chatInput').value = text;
+  sendMessage();
+}
+
+// ── Hiện badge khi chưa mở chat lần đầu ──────────────────────────────────
+setTimeout(() => {
+  if (!isOpen) {
+    const badge = document.getElementById('chatBadge');
+    badge.classList.remove('hidden');
+    badge.classList.add('flex');
+  }
+}, 3000);
+</script>

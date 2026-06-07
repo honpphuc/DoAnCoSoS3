@@ -1,0 +1,108 @@
+<%- include('partials/head') %>
+
+<div class="flex">
+    <%- include('partials/sidebar') %>
+
+    <main class="lg:ml-64 flex-1 min-h-screen p-10 bg-slate-50/50">
+        <header class="mb-10 text-center max-w-3xl mx-auto">
+            <h2 class="text-3xl font-black text-slate-900">
+                <%= roadmap?.title || 'Lộ trình học tập' %>
+            </h2>
+            <p class="text-slate-500 mt-2">
+                Các bài học được sắp xếp theo đúng thứ tự từng tuần, từ Thứ 2 đến Thứ 7.
+            </p>
+
+            <div class="mt-6 inline-flex bg-white rounded-2xl p-1 border border-slate-200 shadow-sm" id="roadmapFilter">
+                <button type="button" data-filter="all" class="px-4 py-2 rounded-xl bg-primary text-white text-sm font-bold">Tất cả</button>
+                <button type="button" data-filter="done" class="px-4 py-2 rounded-xl text-slate-500 text-sm font-bold">Đã học</button>
+                <button type="button" data-filter="progress" class="px-4 py-2 rounded-xl text-slate-500 text-sm font-bold">Đang học</button>
+                <button type="button" data-filter="unlearned" class="px-4 py-2 rounded-xl text-slate-500 text-sm font-bold">Chưa học</button>
+            </div>
+        </header>
+
+        <div class="max-w-6xl mx-auto">
+            <% if (!weeks || weeks.length === 0) { %>
+                <div class="text-center py-20 text-slate-500">Chưa có lộ trình nào để hiển thị.</div>
+            <% } else { %>
+                <% weeks.forEach(week => { %>
+                    <section class="week-section mb-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-xl text-primary">
+                                Tuần <%= week.week %>: <%= week.theme %>
+                            </h3>
+                            <span class="text-sm text-slate-400"><%= week.tasks.length %> bài học</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
+                            <% week.tasks.forEach(task => { %>
+                                <a href="/lesson/<%= task.id %>"
+                                   data-status="<%= task.status || 'unlearned' %>"
+                                   class="roadmap-stage block min-h-44 p-5 rounded-2xl border transition-all <%= task.status === 'done' ? 'bg-teal-50 border-teal-200' : task.status === 'progress' ? 'bg-amber-50 border-amber-200 ring-2 ring-amber-100' : 'bg-white border-slate-100 hover:border-primary' %>">
+                                    <p class="text-xs font-bold uppercase text-slate-400 mb-2">
+                                        <%= task.day_text || task.day_label %>
+                                    </p>
+
+                                    <p class="font-bold text-sm leading-6 <%= task.status === 'done' ? 'text-teal-700' : 'text-slate-900' %>">
+                                        <%= task.topic %>
+                                    </p>
+
+                                    <p class="text-xs text-slate-400 mt-2">
+                                        <%= task.duration_min %> phút
+                                    </p>
+
+                                    <% if (task.status === 'done') { %>
+                                        <span class="text-xs text-teal-600 font-bold mt-3 block">✓ Hoàn thành</span>
+                                    <% } else if (task.status === 'progress') { %>
+                                        <span class="text-xs text-amber-600 font-bold mt-3 block">Đang học</span>
+                                    <% } else { %>
+                                        <span class="text-xs text-slate-400 font-bold mt-3 block">Chưa học</span>
+                                    <% } %>
+                                </a>
+                            <% }) %>
+                        </div>
+                    </section>
+                <% }) %>
+            <% } %>
+        </div>
+    </main>
+</div>
+
+<%- include('partials/footer', { withSidebar: true }) %>
+
+<script>
+(function () {
+    const buttons = Array.from(document.querySelectorAll('#roadmapFilter [data-filter]'));
+    const stages = Array.from(document.querySelectorAll('.roadmap-stage'));
+
+    function setActiveButton(activeFilter) {
+        buttons.forEach((btn) => {
+            btn.className = btn.dataset.filter === activeFilter
+                ? 'px-4 py-2 rounded-xl bg-primary text-white text-sm font-bold'
+                : 'px-4 py-2 rounded-xl text-slate-500 text-sm font-bold';
+        });
+    }
+
+    function filterStages(filter) {
+        stages.forEach((stage) => {
+            const show = filter === 'all' || stage.dataset.status === filter;
+            stage.classList.toggle('hidden', !show);
+        });
+
+        document.querySelectorAll('.week-section').forEach((section) => {
+            const visibleCards = section.querySelectorAll('.roadmap-stage:not(.hidden)');
+            section.classList.toggle('hidden', visibleCards.length === 0);
+        });
+
+        setActiveButton(filter);
+    }
+
+    buttons.forEach((btn) => {
+        btn.addEventListener('click', () => filterStages(btn.dataset.filter));
+    });
+
+    filterStages('all');
+})();
+</script>
+
+</body>
+</html>

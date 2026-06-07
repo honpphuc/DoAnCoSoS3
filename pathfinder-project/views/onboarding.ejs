@@ -1,0 +1,201 @@
+<%- include('partials/head') %>
+<div class="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+    <div class="bg-white rounded-[3rem] shadow-2xl p-12 md:p-20 w-full max-w-4xl" id="onboardingApp">
+        <div class="flex justify-center gap-8 mb-16" id="stepIndicator">
+            <div class="flex flex-col items-center gap-2" data-step="1">
+                <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">1</div>
+                <p class="text-[10px] font-black uppercase text-primary">Mục tiêu</p>
+            </div>
+            <div class="w-16 h-0.5 bg-primary mt-5"></div>
+            <div class="flex flex-col items-center gap-2" data-step="2">
+                <div class="w-10 h-10 border-4 border-slate-100 rounded-full flex items-center justify-center text-slate-300 font-bold">2</div>
+                <p class="text-[10px] font-black uppercase text-slate-300">Cấp độ</p>
+            </div>
+            <div class="w-16 h-0.5 bg-slate-100 mt-5"></div>
+            <div class="flex flex-col items-center gap-2" data-step="3">
+                <div class="w-10 h-10 border-4 border-slate-100 rounded-full flex items-center justify-center text-slate-300 font-bold">3</div>
+                <p class="text-[10px] font-black uppercase text-slate-300">Thời gian</p>
+            </div>
+        </div>
+
+        <div class="text-center mb-12" id="onboardingTitle">
+            <h2 class="text-4xl font-black text-slate-800 mb-4">Bạn muốn học gì hôm nay?</h2>
+            <p class="text-slate-500">Chọn lĩnh vực bạn muốn chinh phục.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12" id="goalOptions">
+            <button type="button" data-goal="ielts" class="border-4 border-primary bg-teal-50 p-8 rounded-[2.5rem] text-center cursor-pointer transition-all scale-105 goal-option">
+                <i class="fa-solid fa-earth-americas text-4xl text-primary mb-4"></i>
+                <p class="font-black text-slate-800">IELTS / Tiếng Anh</p>
+            </button>
+            <button type="button" data-goal="programming" class="border-4 border-slate-50 bg-white p-8 rounded-[2.5rem] text-center cursor-pointer hover:border-slate-100 transition-all goal-option">
+                <i class="fa-solid fa-code text-4xl text-slate-300 mb-4"></i>
+                <p class="font-black text-slate-400">Lập trình</p>
+            </button>
+            <button type="button" data-goal="design" class="border-4 border-slate-50 bg-white p-8 rounded-[2.5rem] text-center cursor-pointer hover:border-slate-100 transition-all goal-option">
+                <i class="fa-solid fa-palette text-4xl text-slate-300 mb-4"></i>
+                <p class="font-black text-slate-400">Thiết kế</p>
+            </button>
+        </div>
+
+        <div class="space-y-8">
+            <div id="levelSection" class="hidden">
+                <label class="block text-xs font-black uppercase text-slate-400 mb-3 tracking-widest">Trình độ hiện tại</label>
+                <select id="levelSelect" class="w-full bg-slate-50 border border-slate-100 py-4 px-6 rounded-2xl font-bold outline-none">
+                    <option>Trung cấp (Đã có kiến thức cơ bản)</option>
+                    <option>Người mới bắt đầu (Zero to Hero)</option>
+                    <option>Nâng cao (Chuyên sâu)</option>
+                </select>
+            </div>
+            <div id="timeSection" class="hidden">
+                <label class="block text-xs font-black uppercase text-slate-400 mb-3 tracking-widest">Thời gian rảnh hàng ngày</label>
+                <div class="flex flex-wrap gap-3">
+                    <button type="button" data-time="15-30" class="time-option px-8 py-3 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">15 - 30 phút</button>
+                    <button type="button" data-time="1-2h" class="time-option px-8 py-3 rounded-xl bg-primary text-white font-bold shadow-lg shadow-teal-100">1 - 2 giờ</button>
+                    <button type="button" data-time="3h+" class="time-option px-8 py-3 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Trên 3 giờ</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-16 flex justify-between items-center">
+            <button id="backBtn" type="button" class="text-slate-400 font-bold">Quay lại</button>
+            <div class="flex gap-3">
+                <button id="nextBtn" type="button" class="bg-primary text-white px-12 py-4 rounded-2xl font-black shadow-2xl shadow-teal-100 hover:scale-[1.02] transition-transform">Tiếp tục</button>
+                <button id="finishBtn" type="button" class="hidden bg-primary text-white px-12 py-4 rounded-2xl font-black shadow-2xl shadow-teal-100 hover:scale-[1.02] transition-transform">Hoàn tất & Tạo lộ trình</button>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include('partials/footer', { withSidebar: false }) %>
+<script>
+    (function () {
+        const state = {
+            step: 1,
+            goal: 'ielts',
+            time: '1-2h'
+        };
+
+        const stepIndicator = document.querySelectorAll('#stepIndicator [data-step]');
+        const title = document.querySelector('#onboardingTitle h2');
+        const subtitle = document.querySelector('#onboardingTitle p');
+        const goalSection = document.querySelector('#goalOptions');
+        const levelSection = document.querySelector('#levelSection');
+        const timeSection = document.querySelector('#timeSection');
+        const nextBtn = document.querySelector('#nextBtn');
+        const finishBtn = document.querySelector('#finishBtn');
+        const backBtn = document.querySelector('#backBtn');
+
+        function updateStepView() {
+            stepIndicator.forEach((item, idx) => {
+                const circle = item.querySelector('div');
+                const text = item.querySelector('p');
+                if (idx + 1 <= state.step) {
+                    circle.className = 'w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold';
+                    text.className = 'text-[10px] font-black uppercase text-primary';
+                } else {
+                    circle.className = 'w-10 h-10 border-4 border-slate-100 rounded-full flex items-center justify-center text-slate-300 font-bold';
+                    text.className = 'text-[10px] font-black uppercase text-slate-300';
+                }
+            });
+
+            goalSection.classList.toggle('hidden', state.step !== 1);
+            levelSection.classList.toggle('hidden', state.step !== 2);
+            timeSection.classList.toggle('hidden', state.step !== 3);
+            nextBtn.classList.toggle('hidden', state.step === 3);
+            finishBtn.classList.toggle('hidden', state.step !== 3);
+
+            if (state.step === 1) {
+                title.textContent = 'Bạn muốn học gì hôm nay?';
+                subtitle.textContent = 'Chọn lĩnh vực bạn muốn chinh phục.';
+                nextBtn.textContent = 'Sang bước 2';
+            } else if (state.step === 2) {
+                title.textContent = 'Chọn mức độ hiện tại của bạn';
+                subtitle.textContent = 'Hệ thống sẽ căn chỉnh độ khó phù hợp với năng lực hiện có.';
+                nextBtn.textContent = 'Sang bước 3';
+            } else {
+                title.textContent = 'Bạn có thể dành bao nhiêu thời gian mỗi ngày?';
+                subtitle.textContent = 'Lịch học sẽ tự động tạo theo quỹ thời gian bạn chọn.';
+                finishBtn.textContent = 'Hoàn tất & Tạo lộ trình';
+            }
+
+            backBtn.classList.toggle('invisible', state.step === 1);
+        }
+
+        document.querySelectorAll('.goal-option').forEach((option) => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.goal-option').forEach((item) => {
+                    item.className = 'border-4 border-slate-50 bg-white p-8 rounded-[2.5rem] text-center cursor-pointer hover:border-slate-100 transition-all goal-option';
+                    const icon = item.querySelector('i');
+                    const label = item.querySelector('p');
+                    icon.className = icon.className.replace('text-primary', 'text-slate-300');
+                    label.className = 'font-black text-slate-400';
+                });
+
+                option.className = 'border-4 border-primary bg-teal-50 p-8 rounded-[2.5rem] text-center cursor-pointer transition-all scale-105 goal-option';
+                option.querySelector('i').className = option.querySelector('i').className.replace('text-slate-300', 'text-primary');
+                option.querySelector('p').className = 'font-black text-slate-800';
+                state.goal = option.dataset.goal;
+            });
+        });
+
+        document.querySelectorAll('.time-option').forEach((option) => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.time-option').forEach((item) => {
+                    item.className = 'time-option px-8 py-3 rounded-xl border border-slate-200 font-bold hover:bg-slate-50';
+                });
+                option.className = 'time-option px-8 py-3 rounded-xl bg-primary text-white font-bold shadow-lg shadow-teal-100';
+                state.time = option.dataset.time;
+            });
+        });
+
+        nextBtn.addEventListener('click', (event) => {
+            if (state.step < 3) {
+                event.preventDefault();
+                state.step += 1;
+                updateStepView();
+            }
+        });
+
+        backBtn.addEventListener('click', () => {
+            if (state.step > 1) {
+                state.step -= 1;
+                updateStepView();
+            }
+        });
+
+        finishBtn.addEventListener('click', async () => {
+            const btn = finishBtn;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>AI đang tạo lộ trình...';
+
+            const goal = state.goal || 'ielts';
+            const level = document.querySelector('#levelSelect')?.value || 'beginner';
+            const hoursPerDay = state.time === '15-30' ? 0.5 : state.time === '1-2h' ? 1.5 : 3;
+
+            try {
+                const res = await fetch('/api/roadmap/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal, level, hours_per_day: hoursPerDay }),
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('Có lỗi: ' + (data.error || 'Không thể tạo lộ trình.'));
+                    btn.disabled = false;
+                    btn.innerHTML = 'Hoàn tất & Tạo lộ trình';
+                }
+            } catch (err) {
+                alert('Lỗi kết nối server');
+                btn.disabled = false;
+                btn.innerHTML = 'Hoàn tất & Tạo lộ trình';
+            }
+        });
+
+        updateStepView();
+    })();
+</script>
+</body>
+</html>

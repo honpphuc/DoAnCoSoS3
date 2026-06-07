@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface-bg: #f5f8f7;
+            --surface-card: #ffffff;
+            --surface-muted: #eef4f2;
+            --text-main: #16212a;
+            --text-subtle: #5f6e7a;
+            --line: #dce5e3;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            color: var(--text-main);
+            background:
+                radial-gradient(circle at 0% 0%, rgba(13, 124, 138, 0.08), transparent 35%),
+                radial-gradient(circle at 100% 100%, rgba(14, 165, 133, 0.08), transparent 35%),
+                var(--surface-bg);
+        }
+
+        .glass { background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(12px); }
+        .sidebar-active { background-color: #e6f6f3; color: #0d7c8a; border-right: 4px solid #0d7c8a; }
+        .panel {
+            background: var(--surface-card);
+            border: 1px solid var(--line);
+            box-shadow: 0 12px 30px rgba(22, 33, 42, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0D7C8A',
+                        primaryLight: '#E6F2F3',
+                        secondary: '#F8FAFC'
+                    },
+                    borderRadius: { '2xl': '1rem', '3xl': '1.5rem' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#fcfdfd] text-slate-800">

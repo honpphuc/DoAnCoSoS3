@@ -1,0 +1,221 @@
+<%- include('partials/head') %>
+
+<div class="flex">
+    <%- include('partials/sidebar') %>
+
+    <main class="lg:ml-64 flex-1 min-h-screen p-10 bg-slate-50/50">
+        <header class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6 mb-10">
+            <div>
+                <h2 class="text-3xl font-black text-slate-900">Lịch học của tôi</h2>
+                <p class="text-slate-500 mt-1">
+                    <%= roadmapTitle || 'Lộ trình của tôi' %> • Tuần <%= currentWeek %>/<%= totalWeeks %>
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="/schedule?week=<%= Math.max(1, currentWeek - 1) %>"
+                   class="px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:border-primary hover:text-primary">
+                    ← Tuần trước
+                </a>
+
+                <div class="flex bg-white rounded-2xl p-1 shadow-sm border border-slate-100">
+                    <% for (let w = 1; w <= totalWeeks; w++) { %>
+                        <a href="/schedule?week=<%= w %>"
+                           class="px-4 py-2 rounded-xl text-sm font-bold <%= w === currentWeek ? 'bg-primary text-white' : 'text-slate-400 hover:text-primary' %>">
+                            <%= w %>
+                        </a>
+                    <% } %>
+                </div>
+
+                <a href="/schedule?week=<%= Math.min(totalWeeks, currentWeek + 1) %>"
+                   class="px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:border-primary hover:text-primary">
+                    Tuần sau →
+                </a>
+            </div>
+        </header>
+
+        <section class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
+            <% if (!schedule || schedule.length === 0) { %>
+                <div class="text-center py-20 text-slate-500">Chưa có lịch học để hiển thị.</div>
+            <% } else { %>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4">
+                    <% schedule.forEach(day => { %>
+                        <button type="button"
+                                class="day-column text-left rounded-2xl border p-4 transition-all <%= day.day === todayLabel ? 'border-primary bg-teal-50' : 'border-slate-100 bg-slate-50 hover:border-primary' %>"
+                                data-day="<%= day.day %>">
+                            <div class="flex items-center justify-between mb-4">
+                                <p class="text-xs font-black uppercase tracking-widest <%= day.day === todayLabel ? 'text-primary' : 'text-slate-400' %>">
+                                    <%= day.label %>
+                                </p>
+                                <span class="text-xs font-bold text-slate-400"><%= day.tasks.length %> bài</span>
+                            </div>
+
+                            <% if (!day.tasks || day.tasks.length === 0) { %>
+                                <p class="text-xs text-slate-300 italic">Nghỉ</p>
+                            <% } else { %>
+                                <div class="space-y-3">
+                                    <% day.tasks.forEach(task => { %>
+                                        <div class="schedule-task rounded-xl border p-3 bg-white <%= task.is_completed ? 'border-teal-200' : 'border-slate-100' %>"
+                                             data-id="<%= task.id %>"
+                                             data-title="<%= task.topic %>"
+                                             data-desc="<%= task.description || '' %>"
+                                             data-dur="<%= task.duration_min %> phút"
+                                             data-status="<%= task.is_completed ? 'Hoàn thành' : 'Chưa hoàn thành' %>">
+                                            <p class="font-bold text-sm leading-5 <%= task.is_completed ? 'text-teal-700' : 'text-slate-800' %>">
+                                                <%= task.topic %>
+                                            </p>
+                                            <p class="text-xs text-slate-400 mt-1"><%= task.duration_min %> phút</p>
+
+                                            <% if (task.is_completed) { %>
+                                                <p class="text-xs text-teal-600 font-bold mt-2">✓ Hoàn thành</p>
+                                            <% } %>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            <% } %>
+                        </button>
+                    <% }) %>
+                </div>
+            <% } %>
+        </section>
+
+        <%
+            let defaultTask = null;
+            if (schedule) {
+                const todaySchedule = schedule.find(d => d.day === todayLabel);
+                if (todaySchedule && todaySchedule.tasks && todaySchedule.tasks.length > 0) {
+                    defaultTask = todaySchedule.tasks[0];
+                } else {
+                    for (const d of schedule) {
+                        if (d.tasks && d.tasks.length > 0) {
+                            defaultTask = d.tasks[0];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            let totalWeekTasks = 0;
+            let doneWeekTasks = 0;
+            if (schedule) {
+                schedule.forEach(d => {
+                    totalWeekTasks += d.tasks.length;
+                    doneWeekTasks += d.tasks.filter(t => t.is_completed).length;
+                });
+            }
+        %>
+
+        <section class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
+            <div id="taskDetail" class="xl:col-span-2 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+                <p class="text-xs font-bold tracking-widest uppercase text-slate-500">Chi tiết phiên học</p>
+
+                <h4 id="detailTitle" class="text-xl font-black mt-2">
+                    <%= defaultTask ? defaultTask.topic : 'Chọn một buổi học' %>
+                </h4>
+
+                <div class="flex flex-wrap gap-2 mt-3">
+                    <span id="detailDur" class="px-3 py-1 rounded-full bg-slate-100 text-xs font-bold text-slate-500">
+                        <%= defaultTask ? defaultTask.duration_min + ' phút' : '' %>
+                    </span>
+                    <span id="detailStatus" class="px-3 py-1 rounded-full bg-teal-50 text-xs font-bold text-teal-600">
+                        <%= defaultTask ? (defaultTask.is_completed ? 'Hoàn thành' : 'Chưa hoàn thành') : '' %>
+                    </span>
+                </div>
+
+                <p id="detailDesc" class="text-sm text-slate-600 leading-7 mt-4">
+                    <%= defaultTask ? defaultTask.description : '' %>
+                </p>
+
+                <% if (defaultTask) { %>
+                    <a id="detailLink" href="/lesson/<%= defaultTask.id %>"
+                       class="inline-block mt-5 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-teal-700">
+                        Bắt đầu học →
+                    </a>
+                <% } else { %>
+                    <a id="detailLink" href="#"
+                       class="hidden inline-block mt-5 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-teal-700">
+                        Bắt đầu học →
+                    </a>
+                <% } %>
+            </div>
+
+            <aside class="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+                <p class="text-xs font-bold tracking-widest uppercase text-slate-500">Tổng quan tuần</p>
+                <p class="text-3xl font-black mt-3"><%= doneWeekTasks %>/<%= totalWeekTasks %></p>
+                <p class="text-sm text-slate-500 mt-1">bài đã hoàn thành</p>
+
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mt-5">
+                    <div class="bg-primary h-full rounded-full"
+                         style="width: <%= totalWeekTasks > 0 ? Math.round(doneWeekTasks / totalWeekTasks * 100) : 0 %>%"></div>
+                </div>
+
+                <p class="text-xs text-slate-400 mt-2">
+                    Tiến độ tuần này:
+                    <strong><%= totalWeekTasks > 0 ? Math.round(doneWeekTasks / totalWeekTasks * 100) : 0 %>%</strong>
+                </p>
+            </aside>
+        </section>
+    </main>
+</div>
+
+<%- include('partials/footer', { withSidebar: true }) %>
+
+<script>
+(function () {
+    const dayColumns = Array.from(document.querySelectorAll('.day-column'));
+    const taskCards = Array.from(document.querySelectorAll('.schedule-task'));
+
+    function clearActive() {
+        dayColumns.forEach(day => day.classList.remove('ring-2', 'ring-primary'));
+        taskCards.forEach(task => task.classList.remove('ring-2', 'ring-primary'));
+    }
+
+    function showTask(task) {
+        clearActive();
+
+        task.classList.add('ring-2', 'ring-primary');
+        task.closest('.day-column')?.classList.add('ring-2', 'ring-primary');
+
+        document.getElementById('detailTitle').textContent = task.dataset.title;
+        document.getElementById('detailDur').textContent = task.dataset.dur;
+        document.getElementById('detailStatus').textContent = task.dataset.status;
+        document.getElementById('detailDesc').textContent = task.dataset.desc || 'Chưa có mô tả chi tiết cho bài học này.';
+
+        const link = document.getElementById('detailLink');
+        link.href = '/lesson/' + task.dataset.id;
+        link.classList.remove('hidden');
+    }
+
+    taskCards.forEach(task => {
+        task.addEventListener('click', (event) => {
+            event.stopPropagation();
+            showTask(task);
+        });
+    });
+
+    dayColumns.forEach(day => {
+        day.addEventListener('click', () => {
+            const firstTask = day.querySelector('.schedule-task');
+            clearActive();
+
+            if (firstTask) {
+                showTask(firstTask);
+            } else {
+                day.classList.add('ring-2', 'ring-primary');
+                document.getElementById('detailTitle').textContent = 'Ngày nghỉ';
+                document.getElementById('detailDur').textContent = '';
+                document.getElementById('detailStatus').textContent = '';
+                document.getElementById('detailDesc').textContent = 'Không có bài học trong ngày này.';
+                document.getElementById('detailLink').classList.add('hidden');
+            }
+        });
+    });
+
+    if (taskCards.length > 0) {
+        showTask(taskCards[0]);
+    }
+})();
+</script>
+
+</body>
+</html>

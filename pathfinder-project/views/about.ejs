@@ -1,0 +1,45 @@
+<%- include('partials/head') %>
+<header class="fixed top-0 left-0 w-full z-50 glass border-b border-white/20">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+        <a href="/" class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-compass"></i></div>
+            <span class="text-xl font-black text-slate-800 tracking-tighter">Pathfinder</span>
+        </a>
+        <nav class="hidden md:flex gap-8">
+            <a href="/" class="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Trang gốc</a>
+            <a href="/about" class="text-sm font-bold text-primary">Về chúng tôi</a>
+            <a href="/login" class="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Đăng nhập</a>
+        </nav>
+        <a href="/onboarding" class="bg-primary text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-teal-100 hover:scale-105 transition-transform">Bắt đầu ngay</a>
+    </div>
+</header>
+
+<main class="pt-36 pb-6 px-6">
+    <section class="max-w-6xl mx-auto panel rounded-[2.5rem] p-8 md:p-12">
+        <p class="text-xs uppercase font-bold tracking-[0.2em] text-primary mb-3">Giới thiệu</p>
+        <h1 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Chúng tôi xây dựng Pathfinder để việc tự học trở nên rõ ràng và có định hướng.</h1>
+        <p class="text-slate-600 mt-6 text-lg leading-relaxed">Pathfinder là dự án hỗ trợ sinh viên thiết kế lộ trình học tập theo mục tiêu cá nhân. Hệ thống giúp bạn biết nên học gì trước, học bao lâu và theo dõi tiến độ theo từng tuần.</p>
+    </section>
+
+    <section class="max-w-6xl mx-auto mt-8 grid md:grid-cols-3 gap-6">
+        <article class="panel rounded-3xl p-6">
+            <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4"><i class="fa-solid fa-seedling"></i></div>
+            <h3 class="text-xl font-bold mb-2">Sứ mệnh</h3>
+            <p class="text-slate-600">Giúp người học chủ động và bền bỉ bằng lộ trình học có thể đo lường, không còn học lan man.</p>
+        </article>
+        <article class="panel rounded-3xl p-6">
+            <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4"><i class="fa-solid fa-users"></i></div>
+            <h3 class="text-xl font-bold mb-2">Đội ngũ</h3>
+            <p class="text-slate-600">Nhóm phát triển xuất phát từ sinh viên công nghệ, thấu hiểu khó khăn khi cân bằng học tập và mục tiêu nghề nghiệp.</p>
+        </article>
+        <article class="panel rounded-3xl p-6">
+            <div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center mb-4"><i class="fa-solid fa-bolt"></i></div>
+            <h3 class="text-xl font-bold mb-2">Cam kết</h3>
+            <p class="text-slate-600">Ưu tiên trải nghiệm tiếng Việt rõ ràng, đơn giản và thực tế để bạn dùng được ngay từ ngày đầu tiên.</p>
+        </article>
+    </section>
+</main>
+
+<%- include('partials/footer', { withSidebar: false }) %>
+</body>
+</html>

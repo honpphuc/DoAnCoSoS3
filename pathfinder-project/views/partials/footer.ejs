@@ -1,0 +1,24 @@
+<footer class="mt-12 border-t border-slate-200/80 bg-white/80 backdrop-blur <%= withSidebar ? 'lg:ml-64' : '' %>">
+    <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <p class="font-bold text-slate-800">Pathfinder</p>
+            <p class="text-sm text-slate-500">Nền tảng học tập cá nhân hóa bằng AI cho sinh viên Việt Nam.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-600">
+            <a href="/" class="hover:text-primary transition-colors">Trang gốc</a>
+            <a href="/about" class="hover:text-primary transition-colors">Về chúng tôi</a>
+
+            <% if (typeof user !== 'undefined' && user) { %>
+                <a href="/roadmap" class="hover:text-primary transition-colors">Lộ trình đã đăng kí</a>
+                <a href="/dashboard" class="hover:text-primary transition-colors">Bảng điều khiển</a>
+            <% } else { %>
+                <a href="/login" class="hover:text-primary transition-colors">Đăng nhập</a>
+            <% } %>
+        </div>
+    </div>
+</footer>
+
+<% if (typeof user !== 'undefined' && user) { %>
+    <%- include('chatbox') %>
+<% } %>

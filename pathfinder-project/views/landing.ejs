@@ -1,0 +1,56 @@
+<%- include('partials/head') %>
+<header class="fixed top-0 left-0 w-full z-50 glass border-b border-white/20">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-compass"></i></div>
+                <span class="text-xl font-black text-slate-800 tracking-tighter">Pathfinder</span>
+        </div>
+        <nav class="hidden md:flex gap-10">
+            <a href="#tinh-nang" class="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Tính năng</a>
+            <a href="/about" class="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Về chúng tôi</a>
+            <a href="/login" class="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Đăng nhập</a>
+        </nav>
+        <a href="/onboarding" class="bg-primary text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-teal-100 hover:scale-105 transition-transform">Bắt đầu ngay</a>
+    </div>
+</header>
+
+<section class="pt-40 pb-20 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <span class="bg-teal-50 text-primary text-xs font-bold px-4 py-2 rounded-full border border-teal-100 mb-6 inline-block">CÁ NHÂN HÓA BỞI AI</span>
+        <h1 class="text-5xl md:text-7xl font-black text-slate-900 leading-tight mb-8">Kiến tạo lộ trình học tập thông minh</h1>
+        <p class="text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">Cá nhân hóa hành trình giáo dục của bạn với công nghệ AI tiên tiến. Giúp bạn đạt được mục tiêu nhanh hơn bao giờ hết.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/onboarding" class="bg-primary text-white px-10 py-4 rounded-2xl font-bold shadow-xl shadow-teal-100 hover:bg-teal-700 transition-all">Bắt đầu miễn phí</a>
+                <button class="bg-white border border-slate-200 px-10 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">Xem bản Demo</button>
+        </div>
+    </div>
+    
+    <div class="mt-20 max-w-5xl mx-auto">
+        <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=2070" class="w-full h-[500px] object-cover rounded-[3rem] shadow-2xl border-8 border-white">
+    </div>
+</section>
+
+<section id="tinh-nang" class="py-20 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid md:grid-cols-3 gap-10">
+            <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
+                <div class="w-14 h-14 bg-teal-50 text-primary rounded-2xl flex items-center justify-center mb-6"><i class="fa-solid fa-map-location-dot text-2xl"></i></div>
+                <h3 class="text-xl font-bold mb-4">Lộ trình cá nhân</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">AI phân tích lỗ hổng kiến thức và phong cách học của bạn để thiết kế lộ trình duy nhất dành riêng cho bạn.</p>
+            </div>
+            <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
+                <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6"><i class="fa-solid fa-chart-pie text-2xl"></i></div>
+                <h3 class="text-xl font-bold mb-4">Theo dõi tiến độ</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Trực quan hóa thành công của bạn với các biểu đồ thời gian thực, giúp bạn duy trì động lực mỗi ngày.</p>
+            </div>
+            <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
+                <div class="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-6"><i class="fa-solid fa-calendar-check text-2xl"></i></div>
+                <h3 class="text-xl font-bold mb-4">Lịch học thông minh</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Tự động sắp xếp lịch dựa trên thói quen sinh hoạt và mức độ ưu tiên của các môn học.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<%- include('partials/footer', { withSidebar: false }) %>
+</body>
+</html>
