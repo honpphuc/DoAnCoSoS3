@@ -1,0 +1,971 @@
+<%- include('partials/head') %>
+
+<div class="flex">
+  <%- include('partials/sidebar') %>
+
+  <main class="lg:ml-64 flex-1 min-h-screen p-6 md:p-8 bg-slate-50/50">
+    <!-- Header -->
+    <header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-teal-50 text-primary rounded-xl flex items-center justify-center text-lg shadow-sm border border-teal-100">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <div>
+            <h2 class="text-2xl font-black text-slate-900">Ôn tập & Kiểm tra Năng lực AI</h2>
+            <p class="text-slate-500 text-xs">Tổng hợp kiến thức chuyên sâu 2 luồng song song & Chấm điểm tự luận đa chiều</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="/game" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold hover:bg-amber-100 transition shadow-sm">
+          <i class="fa-solid fa-gamepad text-amber-600"></i>
+          Chơi Game Ôn Tập
+        </a>
+        <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-teal-50 text-primary border border-teal-200 text-xs font-bold">
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          Gemini Dual-Stream AI
+        </span>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <!-- Cột trái: Cấu hình ôn tập -->
+      <div class="xl:col-span-1 space-y-4">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 sticky top-6">
+          <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm">
+            <i class="fa-solid fa-sliders text-primary"></i>
+            Cấu hình phiên ôn tập
+          </h3>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Phạm vi kiến thức</label>
+              <select id="reviewWeek" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3.5 text-sm font-semibold outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition">
+                <option value="all">📚 Toàn bộ lộ trình (Tất cả các tuần)</option>
+                <% if (weeks && weeks.length > 0) { %>
+                  <% weeks.forEach(w => { %>
+                    <option value="<%= w.week %>">Tuần <%= w.week %>: <%= w.theme %> (<%= w.tasks.length %> bài)</option>
+                  <% }) %>
+                <% } else { %>
+                  <option value="1">Tuần 1</option>
+                <% } %>
+              </select>
+              <p class="text-[11px] text-slate-400 mt-1.5">
+                <i class="fa-solid fa-circle-info mr-1"></i>Hệ thống sẽ tổng hợp kiến thức và sinh câu hỏi tương ứng với phạm vi đã chọn.
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Ngày thi dự kiến (tuỳ chọn)</label>
+              <input type="date" id="examDate" min="<%= new Date().toISOString().split('T')[0] %>"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3.5 text-sm font-medium outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition">
+              <p class="text-[11px] text-slate-400 mt-1">AI sẽ nhấn mạnh vào trọng tâm đề thi và các bẫy hay gặp.</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Thành phần nội dung cần tạo</label>
+              <div class="space-y-2.5 bg-slate-50/70 p-3.5 rounded-xl border border-slate-100">
+                <label class="flex items-center gap-2.5 cursor-pointer">
+                  <input type="checkbox" id="genSummary" checked class="w-4 h-4 accent-primary rounded">
+                  <div class="flex-1">
+                    <span class="text-sm font-bold text-slate-700 block">Tài liệu ôn tập chuyên sâu</span>
+                    <span class="text-[11px] text-slate-400">Luồng 1: Phân tích bản chất, ví dụ, cạm bẫy</span>
+                  </div>
+                </label>
+                <div class="border-t border-slate-200/60 my-1"></div>
+                <label class="flex items-center gap-2.5 cursor-pointer">
+                  <input type="checkbox" id="genQuiz" checked class="w-4 h-4 accent-primary rounded">
+                  <div class="flex-1">
+                    <span class="text-sm font-bold text-slate-700 block">Bộ đề trắc nghiệm AI</span>
+                    <span class="text-[11px] text-slate-400">Luồng 2: Câu hỏi tình huống tư duy</span>
+                  </div>
+                </label>
+                <label class="flex items-center gap-2.5 cursor-pointer">
+                  <input type="checkbox" id="genEssay" class="w-4 h-4 accent-primary rounded">
+                  <div class="flex-1">
+                    <span class="text-sm font-bold text-slate-700 block">Câu hỏi tự luận & Chấm điểm AI</span>
+                    <span class="text-[11px] text-slate-400">Luồng 2: Viết bài luận và AI chấm điểm, sửa lỗi</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <button id="generateBtn" onclick="generateReview()"
+              class="w-full bg-primary text-white py-3.5 rounded-xl font-bold hover:bg-teal-700 shadow-lg shadow-teal-100 transition-all flex items-center justify-center gap-2 text-sm">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              Bắt đầu Sinh tài liệu & Bộ đề
+            </button>
+          </div>
+        </div>
+
+        <!-- Exam Countdown -->
+        <div id="countdownPanel" class="hidden bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+          <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm">
+            <i class="fa-regular fa-clock text-orange-500"></i>
+            Đếm ngược đến ngày thi
+          </h3>
+          <div class="text-center py-2">
+            <p id="countdownDays" class="text-4xl font-black text-primary">--</p>
+            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">ngày còn lại</p>
+            <p id="countdownDate" class="text-xs text-slate-400 mt-2 bg-slate-50 py-1.5 px-3 rounded-lg"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cột phải: Khu vực hiển thị kết quả -->
+      <div class="xl:col-span-2">
+        <div id="reviewOutput" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 md:p-8 min-h-[450px]">
+          <!-- Trạng thái chờ -->
+          <div id="placeholderState" class="text-center py-20">
+            <div class="w-20 h-20 bg-teal-50 rounded-3xl flex items-center justify-center mx-auto mb-4 text-primary text-3xl shadow-sm border border-teal-100">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h3 class="font-black text-slate-800 text-lg mb-2">Chưa có phiên ôn tập nào</h3>
+            <p class="text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+              Tùy chọn phạm vi và tích chọn loại câu hỏi (Trắc nghiệm hoặc Tự luận) ở bảng bên trái, sau đó nhấn <strong class="text-slate-600">"Bắt đầu Sinh tài liệu & Bộ đề"</strong>.
+            </p>
+            <div class="mt-6 flex flex-wrap justify-center gap-4 text-xs font-semibold text-slate-400">
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-bolt text-teal-600"></i> 2 luồng Gemini song song</span>
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-check text-teal-600"></i> Chỉ sinh đúng loại đã tích</span>
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-pen-nib text-teal-600"></i> AI chấm điểm tự luận</span>
+            </div>
+          </div>
+
+          <!-- Trạng thái đang tải (Loading) -->
+          <div id="loadingState" class="hidden py-12">
+            <div class="flex items-center gap-3.5 mb-6 bg-teal-50/70 p-4 rounded-2xl border border-teal-100">
+              <div class="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-md shadow-teal-100">
+                <i class="fa-solid fa-spinner fa-spin text-lg"></i>
+              </div>
+              <div>
+                <p class="font-black text-slate-900 text-sm">Gemini AI đang chạy 2 luồng xử lý song song...</p>
+                <p class="text-xs text-teal-700 font-medium" id="loadingMsg">Luồng 1 đang phân tích lý thuyết chuyên sâu, Luồng 2 đang biên soạn câu hỏi kiểm tra...</p>
+              </div>
+            </div>
+            <div class="animate-pulse space-y-4">
+              <div class="h-6 bg-slate-100 rounded-xl w-3/4"></div>
+              <div class="h-4 bg-slate-100 rounded-lg"></div>
+              <div class="h-4 bg-slate-100 rounded-lg w-5/6"></div>
+              <div class="h-28 bg-slate-50 rounded-2xl border border-slate-100"></div>
+              <div class="h-6 bg-slate-100 rounded-xl w-1/2 mt-6"></div>
+              <div class="h-4 bg-slate-100 rounded-lg"></div>
+            </div>
+          </div>
+
+          <!-- Nội dung hiển thị sau khi tạo xong -->
+          <div id="contentState" class="hidden space-y-10"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<%- include('partials/footer', { withSidebar: true }) %>
+
+<script>
+const roadmapData = <%- JSON.stringify(weeks || []) %>;
+const roadmapGoal = <%- JSON.stringify(roadmap && roadmap.goal ? roadmap.goal : '') %>;
+const roadmapTitle = <%- JSON.stringify(roadmap && roadmap.title ? roadmap.title : 'Lộ trình của tôi') %>;
+
+// Biến lưu trữ phiên hiện tại
+let currentReviewSession = null;
+let userQuizAnswers = {}; // { qid: optionIndex }
+let isQuizSubmitted = false;
+
+// Đếm ngược ngày thi
+document.getElementById('examDate').addEventListener('change', function() {
+  const panel = document.getElementById('countdownPanel');
+  if (!this.value) { panel.classList.add('hidden'); return; }
+  panel.classList.remove('hidden');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const exam = new Date(this.value);
+  const diff = Math.ceil((exam - today) / (1000*60*60*24));
+  document.getElementById('countdownDays').textContent = diff > 0 ? diff : 0;
+  document.getElementById('countdownDate').textContent = exam.toLocaleDateString('vi-VN', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+});
+
+async function generateReview() {
+  const btn = document.getElementById('generateBtn');
+  const weekVal = document.getElementById('reviewWeek').value;
+  const examDate = document.getElementById('examDate').value;
+  const genSummary = document.getElementById('genSummary').checked;
+  const genQuiz = document.getElementById('genQuiz').checked;
+  const genEssay = document.getElementById('genEssay').checked;
+
+  if (!genSummary && !genQuiz && !genEssay) {
+    showToast('Vui lòng tích chọn ít nhất một thành phần ôn tập!', 'warning');
+    return;
+  }
+
+  // Lấy danh sách tasks tương ứng
+  let selectedTasks = [];
+  if (weekVal === 'all') {
+    roadmapData.forEach(w => { selectedTasks = selectedTasks.concat(w.tasks || []); });
+  } else {
+    const week = roadmapData.find(w => String(w.week) === weekVal);
+    selectedTasks = week ? (week.tasks || []) : [];
+  }
+
+  if (selectedTasks.length === 0) {
+    showToast('Không tìm thấy bài học nào trong tuần này.', 'error');
+    return;
+  }
+
+  // Reset UI
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> AI đang xử lý 2 luồng...';
+  document.getElementById('placeholderState').classList.add('hidden');
+  document.getElementById('contentState').classList.add('hidden');
+  document.getElementById('loadingState').classList.remove('hidden');
+
+  const loadingMessages = [
+    'Luồng 1: Biên soạn tài liệu lý thuyết chuyên sâu & cạm bẫy...',
+    'Luồng 2: Tạo bộ câu hỏi chính xác theo yêu cầu...',
+    'Tối ưu hóa phản hồi và kiểm tra tính toàn vẹn...',
+    'Hoàn thiện tài liệu ôn tập...'
+  ];
+  let msgIdx = 0;
+  const msgEl = document.getElementById('loadingMsg');
+  const msgInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % loadingMessages.length;
+    msgEl.textContent = loadingMessages[msgIdx];
+  }, 2000);
+
+  try {
+    const res = await fetch('/api/review/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tasks: selectedTasks.map(t => ({ topic: t.topic, description: t.description || '' })),
+        week: weekVal,
+        examDate,
+        goal: roadmapGoal,
+        genSummary,
+        genQuiz,
+        genEssay,
+      }),
+    });
+
+    clearInterval(msgInterval);
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Lỗi khi gọi AI Gemini.');
+    }
+
+    currentReviewSession = data;
+    userQuizAnswers = {};
+    isQuizSubmitted = false;
+
+    renderReviewContent(data, weekVal, selectedTasks.length, genSummary, genQuiz, genEssay);
+
+  } catch (err) {
+    clearInterval(msgInterval);
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('placeholderState').classList.remove('hidden');
+    showToast(err.message || 'Lỗi khi tạo tài liệu. Vui lòng thử lại.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Bắt đầu Sinh tài liệu & Bộ đề';
+  }
+}
+
+function renderReviewContent(data, weekVal, taskCount, hasSummary, hasQuiz, hasEssay) {
+  document.getElementById('loadingState').classList.add('hidden');
+  const container = document.getElementById('contentState');
+  container.innerHTML = '';
+  container.classList.remove('hidden');
+
+  const weekLabel = weekVal === 'all' ? 'Toàn bộ lộ trình' : `Tuần ${weekVal}`;
+  const quizCount = (data.quiz && hasQuiz) ? data.quiz.length : 0;
+  const essayCount = (data.essay && hasEssay) ? data.essay.length : 0;
+  const totalQuestions = quizCount + essayCount;
+
+  let html = `
+    <!-- Top Metadata Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="text-xs font-black uppercase tracking-wider text-primary bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-100">
+            ${weekLabel}
+          </span>
+          <span class="text-xs text-slate-400 font-medium">${taskCount} chủ đề học</span>
+          ${hasQuiz ? `<span class="text-xs text-teal-600 bg-teal-50 px-2 py-0.5 rounded-md font-bold">${quizCount} trắc nghiệm</span>` : ''}
+          ${hasEssay ? `<span class="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md font-bold">${essayCount} tự luận</span>` : ''}
+        </div>
+        <h3 class="font-black text-slate-900 text-xl">${roadmapTitle}</h3>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="window.print()" class="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-primary bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl transition">
+          <i class="fa-solid fa-print"></i> In tài liệu
+        </button>
+      </div>
+    </div>
+  `;
+
+  // 1. TỔNG HỢP KIẾN THỨC CHI TIẾT (LUỒNG 1)
+  if (hasSummary && data.summary && data.summary.length > 0) {
+    html += `
+      <div id="theorySection" class="space-y-6">
+        <div>
+          <h4 class="font-black text-slate-900 text-lg flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-lg bg-teal-50 text-primary flex items-center justify-center text-sm border border-teal-100">
+              <i class="fa-solid fa-book-open"></i>
+            </span>
+            Tài liệu Ôn tập Lý thuyết Chuyên sâu
+          </h4>
+          <p class="text-xs text-slate-400 mt-1">Biên soạn chi tiết bởi Gemini AI — Phân tích bản chất, ví dụ thực tế và cạm bẫy thi cử</p>
+        </div>
+
+        <div class="space-y-6">
+          ${data.summary.map((item, idx) => `
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm hover:border-primary/40 transition-all">
+              <!-- Header bài học -->
+              <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                  <span class="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+                    ${idx + 1}
+                  </span>
+                  <h5 class="font-black text-slate-900 text-base">${item.topic}</h5>
+                </div>
+                ${item.estimated_minutes ? `
+                  <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
+                    <i class="fa-regular fa-clock mr-1 text-primary"></i> ${item.estimated_minutes}
+                  </span>
+                ` : ''}
+              </div>
+
+              <!-- Tổng quan -->
+              ${item.overview ? `
+                <div class="mb-5 bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 leading-relaxed">
+                  <p class="font-bold text-primary text-xs uppercase tracking-wider mb-1">
+                    <i class="fa-solid fa-compass mr-1"></i> Khái quát toàn cảnh & Mục đích
+                  </p>
+                  <p>${item.overview}</p>
+                </div>
+              ` : ''}
+
+              <!-- Kiến thức cốt lõi -->
+              ${item.core_knowledge && item.core_knowledge.length > 0 ? `
+                <div class="mb-5 space-y-3">
+                  <p class="font-bold text-xs uppercase tracking-wider text-slate-500">Kiến thức cốt lõi & Cơ chế hoạt động:</p>
+                  <div class="space-y-3.5">
+                    ${item.core_knowledge.map(k => `
+                      <div class="border-l-2 border-primary pl-4 py-0.5">
+                        <p class="font-bold text-sm text-slate-900">${k.concept}</p>
+                        <p class="text-sm text-slate-600 mt-1 leading-relaxed">${k.explanation}</p>
+                        ${k.example ? `
+                          <div class="mt-2 text-xs bg-slate-900 text-teal-300 p-3 rounded-xl font-mono leading-relaxed overflow-x-auto">
+                            <span class="text-slate-400 font-bold block mb-1 font-sans">// Ví dụ minh họa thực tế:</span>
+                            <code>${escapeHtml(k.example)}</code>
+                          </div>
+                        ` : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+
+              <!-- Phân tích chuyên sâu -->
+              ${item.deep_dive ? `
+                <div class="mb-4 bg-teal-50/60 border border-teal-100 rounded-xl p-4 text-sm text-slate-700">
+                  <p class="font-bold text-teal-800 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-layer-group text-teal-600"></i> Phân tích nâng cao & Best Practices
+                  </p>
+                  <p class="leading-relaxed">${item.deep_dive}</p>
+                </div>
+              ` : ''}
+
+              <!-- Cạm bẫy & Sai lầm thường gặp -->
+              ${item.common_mistakes && item.common_mistakes.length > 0 ? `
+                <div class="mb-4 bg-amber-50/60 border border-amber-100 rounded-xl p-4 text-sm text-amber-950">
+                  <p class="font-bold text-amber-800 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Cạm bẫy & Lỗi sai kinh điển:
+                  </p>
+                  <ul class="space-y-1.5 text-xs text-amber-900">
+                    ${item.common_mistakes.map(m => `<li class="flex items-start gap-2"><span class="text-amber-500 mt-0.5 font-bold">•</span><span>${m}</span></li>`).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+
+              <!-- Ứng dụng thực tế & Mẹo thi cử -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 text-xs">
+                ${item.practical_application ? `
+                  <div class="bg-blue-50/50 border border-blue-100 p-3 rounded-xl text-blue-900">
+                    <p class="font-bold text-blue-800 mb-1 flex items-center gap-1.5">
+                      <i class="fa-solid fa-briefcase text-blue-500"></i> Ứng dụng thực tiễn
+                    </p>
+                    <p class="text-slate-600">${item.practical_application}</p>
+                  </div>
+                ` : ''}
+                ${item.exam_tips ? `
+                  <div class="bg-emerald-50/50 border border-emerald-100 p-3 rounded-xl text-emerald-900">
+                    <p class="font-bold text-emerald-800 mb-1 flex items-center gap-1.5">
+                      <i class="fa-solid fa-bullseye text-emerald-600"></i> Mẹo ghi điểm thi
+                    </p>
+                    <p class="text-slate-600">${item.exam_tips}</p>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // 2. BANNER CHUYỂN TIẾP XUỐNG BÀI KIỂM TRA (CHỈ HIỆN KHI CÓ CÂU HỎI TRẮC NGHIỆM HOẶC TỰ LUẬN)
+  if (totalQuestions > 0) {
+    let bannerTitle = 'Sẵn sàng kiểm tra năng lực?';
+    let bannerDesc = '';
+    let btnText = 'Bắt đầu làm bài kiểm tra';
+
+    if (hasQuiz && hasEssay) {
+      bannerDesc = `Gemini AI đã tạo bộ đề gồm <strong class="text-primary">${quizCount} câu trắc nghiệm</strong> và <strong class="text-orange-600">${essayCount} câu tự luận chấm điểm AI</strong>.`;
+      btnText = `Làm bài kiểm tra (${quizCount} TN + ${essayCount} TL)`;
+    } else if (hasQuiz) {
+      bannerDesc = `Gemini AI đã tạo riêng bộ đề gồm <strong class="text-primary">${quizCount} câu hỏi trắc nghiệm</strong> tình huống tư duy.`;
+      btnText = `Bắt đầu làm trắc nghiệm (${quizCount} câu)`;
+    } else if (hasEssay) {
+      bannerDesc = `Gemini AI đã tạo <strong class="text-orange-600">${essayCount} câu hỏi tự luận</strong>. Bạn có thể tự viết bài làm và nhận đánh giá, chấm điểm chi tiết bằng AI.`;
+      btnText = `Bắt đầu làm bài tự luận (${essayCount} câu)`;
+    }
+
+    html += `
+      <div id="quizPromptBanner" class="my-10 bg-gradient-to-r from-teal-50 via-teal-100/30 to-blue-50 border-2 border-teal-200/80 rounded-3xl p-8 text-center shadow-lg shadow-teal-50 transition-all">
+        <div class="w-14 h-14 bg-primary text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md shadow-teal-100 text-2xl">
+          <i class="fa-solid fa-pen-ruler"></i>
+        </div>
+        <h4 class="text-xl font-black text-slate-900 mb-2">${bannerTitle}</h4>
+        <p class="text-sm text-slate-600 max-w-xl mx-auto mb-6 leading-relaxed">
+          ${bannerDesc}
+        </p>
+        <button id="btnStartQuiz" onclick="startTestSession()" class="px-8 py-4 bg-primary text-white rounded-2xl font-black shadow-xl shadow-teal-200 hover:bg-teal-700 hover:scale-[1.02] active:scale-[0.98] transition-all inline-flex items-center gap-3 text-sm">
+          <i class="fa-solid fa-circle-play text-base"></i>
+          ${btnText}
+        </button>
+      </div>
+    `;
+  }
+
+  // KHU VỰC LÀM BÀI (BAN ĐẦU ẨN CHO TỚI KHI CLICK BẮT ĐẦU)
+  html += `<div id="testAreaSection" class="${totalQuestions > 0 ? 'hidden' : ''} pt-6 space-y-10">`;
+
+  // 3. PHẦN BÀI TẬP TRẮC NGHIỆM (NẾU ĐƯỢC CHỌN)
+  if (hasQuiz && data.quiz && data.quiz.length > 0) {
+    html += `
+      <div id="quizSectionContainer" class="space-y-6">
+        <!-- Quiz Control Bar -->
+        <div class="bg-slate-900 text-white rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 text-[10px] font-bold uppercase tracking-wider">
+                Phần 1: Trắc nghiệm
+              </span>
+              <span class="text-xs text-slate-400">Tạo bởi Gemini AI</span>
+            </div>
+            <h4 class="text-lg font-black text-white mt-1">Câu Hỏi Trắc Nghiệm Đánh Giá Năng Lực</h4>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="text-right">
+              <p class="text-xs text-slate-400">Tiến độ làm bài</p>
+              <p class="font-black text-teal-300 text-sm" id="quizProgressText">0 / ${quizCount} câu</p>
+            </div>
+            <button id="btnSubmitQuiz" onclick="submitQuiz()" class="px-5 py-2.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-black rounded-xl text-xs transition shadow-lg shadow-teal-500/20">
+              Nộp bài Trắc nghiệm
+            </button>
+          </div>
+        </div>
+
+        <!-- Bảng điểm tổng kết trắc nghiệm -->
+        <div id="quizScoreCard" class="hidden bg-white border-2 border-teal-200 rounded-3xl p-8 text-center shadow-lg"></div>
+
+        <!-- Danh sách câu hỏi trắc nghiệm -->
+        <div class="space-y-6" id="quizCardsList">
+          ${data.quiz.map((q, idx) => `
+            <div class="quiz-question-card bg-white border border-slate-200 rounded-2xl p-6 shadow-sm transition-all" data-qid="${q.id || idx + 1}">
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="text-xs font-black text-primary bg-teal-50 px-2.5 py-1 rounded-lg">
+                  Câu ${idx + 1} / ${quizCount}
+                </span>
+                ${q.topic_reference ? `
+                  <span class="text-[11px] font-semibold text-slate-500 bg-slate-50 px-2.5 py-0.5 rounded-full border border-slate-100">
+                    ${q.topic_reference}
+                  </span>
+                ` : ''}
+              </div>
+
+              <p class="font-bold text-slate-900 text-base leading-snug mb-4">${q.question}</p>
+
+              <div class="space-y-2.5">
+                ${(q.options || []).map((opt, oi) => {
+                  const letter = ['A', 'B', 'C', 'D'][oi] || String.fromCharCode(65 + oi);
+                  return `
+                    <button type="button" onclick="selectQuizOption(${q.id || idx + 1}, ${oi})"
+                      data-option-index="${oi}"
+                      class="quiz-option-btn w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-primary hover:bg-teal-50/20 transition-all flex items-center gap-3.5 group">
+                      <span class="option-badge w-7 h-7 rounded-lg border border-slate-300 text-slate-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover:border-primary group-hover:text-primary transition-colors">
+                        ${letter}
+                      </span>
+                      <span class="text-sm font-medium text-slate-700 leading-normal flex-1">${opt}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+
+              <!-- Hộp giải thích sau khi nộp -->
+              <div class="quiz-solution-box hidden mt-4 pt-4 border-t border-slate-100 text-sm">
+                <div class="p-4 rounded-xl bg-teal-50/90 border border-teal-100 text-teal-950">
+                  <p class="font-bold flex items-center gap-2 text-teal-900">
+                    <i class="fa-solid fa-circle-check text-teal-600"></i> Đáp án đúng: ${q.answer}
+                  </p>
+                  <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                    <strong>Giải thích chi tiết:</strong> ${q.explanation || 'Không có giải thích chi tiết.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // 4. PHẦN BÀI TẬP TỰ LUẬN & CHẤM ĐIỂM AI (NẾU ĐƯỢC CHỌN)
+  if (hasEssay && data.essay && data.essay.length > 0) {
+    html += `
+      <div id="essaySectionContainer" class="space-y-6 pt-4">
+        <!-- Essay Header -->
+        <div class="bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">
+                ${hasQuiz ? 'Phần 2: Tự luận' : 'Phần bài kiểm tra: Tự luận'}
+              </span>
+              <span class="text-xs text-orange-100">Được chấm điểm & gợi ý sửa đổi chi tiết bởi AI</span>
+            </div>
+            <h4 class="text-lg font-black text-white mt-1">Câu Hỏi Tự Luận & Đánh Giá Năng Lực Sâu</h4>
+          </div>
+          <div class="text-xs bg-white/20 px-3 py-1.5 rounded-xl text-white font-bold">
+            ${essayCount} câu tự luận
+          </div>
+        </div>
+
+        <!-- Danh sách câu hỏi tự luận -->
+        <div class="space-y-8">
+          ${data.essay.map((q, idx) => `
+            <div class="essay-card bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4" data-essay-id="${q.id || idx + 1}">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs font-black text-orange-700 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100">
+                  Câu tự luận ${idx + 1} / ${essayCount}
+                </span>
+                <span class="text-xs font-bold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg">
+                  Thang điểm: ${q.max_score || 10} điểm
+                </span>
+              </div>
+
+              <!-- Nội dung câu hỏi -->
+              <div>
+                <p class="font-bold text-slate-900 text-base leading-snug">${q.question}</p>
+                ${q.topic_reference ? `<p class="text-xs text-slate-400 mt-1">Chủ đề: ${q.topic_reference}</p>` : ''}
+              </div>
+
+              <!-- Tiêu chí chấm điểm & Gợi ý (Thu gọn) -->
+              <details class="text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-100 cursor-pointer">
+                <summary class="font-bold text-slate-600 hover:text-primary transition flex items-center justify-between">
+                  <span><i class="fa-solid fa-lightbulb text-amber-500 mr-1.5"></i> Xem tiêu chí chấm điểm & Gợi ý dàn bài</span>
+                  <span class="text-[10px] text-slate-400">Nhấn để mở</span>
+                </summary>
+                <div class="mt-3 space-y-2 text-slate-600 border-t border-slate-200/60 pt-2.5 leading-relaxed">
+                  ${q.evaluation_criteria ? `<p><strong>Tiêu chí chấm điểm:</strong> ${q.evaluation_criteria}</p>` : ''}
+                  ${q.hint ? `<p><strong>Gợi ý hướng làm bài:</strong> ${q.hint}</p>` : ''}
+                </div>
+              </details>
+
+              <!-- Khung nhập bài làm của sinh viên -->
+              <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <label class="font-bold text-slate-700">Bài làm của bạn:</label>
+                  <span class="text-slate-400 essay-word-count" id="wordCount_${idx + 1}">0 từ</span>
+                </div>
+                <textarea id="essayAnswer_${idx + 1}" rows="6"
+                  oninput="updateWordCount(${idx + 1})"
+                  placeholder="Nhập câu trả lời hoặc giải pháp chi tiết của bạn vào đây... (Hãy trình bày rõ ràng từng luận điểm)"
+                  class="w-full bg-slate-50/70 border border-slate-200 rounded-xl p-4 text-sm text-slate-800 leading-relaxed outline-none focus:border-orange-500 focus:bg-white focus:ring-2 focus:ring-orange-500/10 transition"></textarea>
+              </div>
+
+              <!-- Nút gửi chấm điểm -->
+              <div class="flex items-center justify-between pt-2">
+                <p class="text-[11px] text-slate-400">
+                  <i class="fa-solid fa-robot mr-1"></i>Gemini AI sẽ chấm điểm, chỉ ra ưu/nhược điểm và viết bài mẫu chỉnh sửa.
+                </p>
+                <button type="button" onclick="gradeEssay(${idx + 1})" id="btnGradeEssay_${idx + 1}"
+                  class="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-orange-200 flex items-center gap-2">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  Chấm điểm bài làm bằng AI
+                </button>
+              </div>
+
+              <!-- Khung kết quả chấm điểm của AI (ban đầu ẩn) -->
+              <div id="essayGradingResult_${idx + 1}" class="hidden mt-4 pt-4 border-t border-slate-100 space-y-4"></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  html += `</div>`; // đóng testAreaSection
+
+  container.innerHTML = html;
+}
+
+// Bắt đầu làm bài kiểm tra
+function startTestSession() {
+  const testArea = document.getElementById('testAreaSection');
+  const banner = document.getElementById('quizPromptBanner');
+
+  if (testArea) {
+    testArea.classList.remove('hidden');
+    if (banner) {
+      banner.classList.add('opacity-40', 'pointer-events-none');
+    }
+    testArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showToast('Đã mở khu vực bài kiểm tra!', 'info');
+  }
+}
+
+// Cập nhật số từ của bài tự luận
+function updateWordCount(essayIndex) {
+  const textarea = document.getElementById(`essayAnswer_${essayIndex}`);
+  const counter = document.getElementById(`wordCount_${essayIndex}`);
+  if (!textarea || !counter) return;
+
+  const text = textarea.value.trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  counter.textContent = `${words} từ (${text.length} ký tự)`;
+}
+
+// CHẤM ĐIỂM BÀI TỰ LUẬN BẰNG GEMINI AI
+async function gradeEssay(essayIndex) {
+  const textarea = document.getElementById(`essayAnswer_${essayIndex}`);
+  const btn = document.getElementById(`btnGradeEssay_${essayIndex}`);
+  const resultDiv = document.getElementById(`essayGradingResult_${essayIndex}`);
+
+  if (!textarea || !btn || !resultDiv) return;
+
+  const studentAnswer = textarea.value.trim();
+  if (!studentAnswer) {
+    showToast('Vui lòng gõ bài làm trước khi yêu cầu AI chấm điểm!', 'warning');
+    textarea.focus();
+    return;
+  }
+
+  // Lấy dữ liệu câu hỏi từ session
+  const essayQuestion = currentReviewSession?.essay?.[essayIndex - 1];
+  if (!essayQuestion) {
+    showToast('Không tìm thấy thông tin câu hỏi.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Giám khảo AI đang chấm...';
+
+  resultDiv.innerHTML = `
+    <div class="p-6 bg-orange-50/40 rounded-2xl border border-orange-100 flex items-center gap-3">
+      <i class="fa-solid fa-spinner fa-spin text-orange-600 text-lg"></i>
+      <div class="text-xs text-orange-900">
+        <p class="font-bold">Đang phân tích bài làm của bạn...</p>
+        <p class="text-slate-500 mt-0.5">Gemini AI đang đối chiếu tiêu chí, đánh giá lập luận và soạn bài gợi ý chỉnh sửa.</p>
+      </div>
+    </div>
+  `;
+  resultDiv.classList.remove('hidden');
+
+  try {
+    const res = await fetch('/api/review/grade-essay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: essayQuestion.question,
+        studentAnswer: studentAnswer,
+        topic: essayQuestion.topic_reference || '',
+        hint: essayQuestion.hint || '',
+        evaluationCriteria: essayQuestion.evaluation_criteria || '',
+        maxScore: essayQuestion.max_score || 10,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Lỗi khi chấm điểm.');
+    }
+
+    const ev = data.evaluation;
+    const score = Number(ev.score) || 0;
+    const maxScore = Number(ev.max_score) || 10;
+    const percent = Math.round((score / maxScore) * 100);
+
+    let scoreBadgeColor = 'bg-teal-500 text-white';
+    let scoreBg = 'bg-teal-50 border-teal-200 text-teal-900';
+    if (percent < 50) {
+      scoreBadgeColor = 'bg-red-500 text-white';
+      scoreBg = 'bg-red-50 border-red-200 text-red-900';
+    } else if (percent < 75) {
+      scoreBadgeColor = 'bg-amber-500 text-white';
+      scoreBg = 'bg-amber-50 border-amber-200 text-amber-900';
+    }
+
+    resultDiv.innerHTML = `
+      <div class="bg-white border-2 border-slate-200 rounded-2xl p-6 shadow-md space-y-5">
+        <!-- Điểm số & Xếp loại -->
+        <div class="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl ${scoreBg} border">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl ${scoreBadgeColor} flex items-center justify-center font-black text-xl shadow-md">
+              ${score}
+            </div>
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Kết quả đánh giá AI</p>
+              <h5 class="text-base font-black text-slate-900">
+                Thang điểm: ${score} / ${maxScore} (${percent}%) — <span class="text-primary">${ev.grade_level || 'Đạt'}</span>
+              </h5>
+            </div>
+          </div>
+          <span class="text-xs bg-white/80 px-3 py-1.5 rounded-lg font-bold border border-slate-200">
+            <i class="fa-solid fa-certificate text-amber-500 mr-1"></i> Giám khảo Gemini AI
+          </span>
+        </div>
+
+        <!-- Nhận xét tổng quan -->
+        ${ev.general_feedback ? `
+          <div class="text-sm text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <p class="font-bold text-xs uppercase tracking-wider text-slate-500 mb-1">Nhận xét tổng quan:</p>
+            <p class="leading-relaxed">${ev.general_feedback}</p>
+          </div>
+        ` : ''}
+
+        <!-- 2 Cột: Ưu điểm & Điểm cần cải thiện -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <!-- Ưu điểm -->
+          <div class="bg-emerald-50/60 border border-emerald-100 p-4 rounded-xl text-emerald-950 space-y-2">
+            <p class="font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5 text-xs">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i> Điểm sáng trong bài làm:
+            </p>
+            <ul class="space-y-1.5">
+              ${(ev.strengths || []).map(s => `<li class="flex items-start gap-1.5"><span class="text-emerald-500 font-bold">•</span><span>${s}</span></li>`).join('')}
+            </ul>
+          </div>
+
+          <!-- Thiếu sót -->
+          <div class="bg-rose-50/60 border border-rose-100 p-4 rounded-xl text-rose-950 space-y-2">
+            <p class="font-bold text-rose-800 uppercase tracking-wider flex items-center gap-1.5 text-xs">
+              <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Điểm còn thiếu hoặc sai sót:
+            </p>
+            <ul class="space-y-1.5">
+              ${(ev.weaknesses || []).map(w => `<li class="flex items-start gap-1.5"><span class="text-rose-500 font-bold">•</span><span>${w}</span></li>`).join('')}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Gợi ý chỉnh sửa chi tiết -->
+        ${ev.improvement_suggestions && ev.improvement_suggestions.length > 0 ? `
+          <div class="bg-blue-50/60 border border-blue-100 p-4 rounded-xl text-xs text-blue-950 space-y-2">
+            <p class="font-bold text-blue-800 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-pen-fancy text-blue-600"></i> Hướng dẫn chỉnh sửa để đạt điểm tối đa:
+            </p>
+            <ul class="space-y-1.5">
+              ${ev.improvement_suggestions.map(sg => `<li class="flex items-start gap-1.5"><span class="text-blue-500 font-bold">→</span><span>${sg}</span></li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+
+        <!-- Bài làm mẫu hoàn hảo -->
+        ${ev.improved_answer ? `
+          <div class="bg-slate-900 text-slate-100 p-5 rounded-2xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800">
+              <span class="font-bold text-teal-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-star text-amber-400"></i> Bài làm mẫu xuất sắc tham khảo (Chuẩn 10/10)
+              </span>
+              <button type="button" onclick="copyImprovedAnswer(${essayIndex})" class="text-slate-400 hover:text-white transition">
+                <i class="fa-regular fa-copy"></i> Sao chép
+              </button>
+            </div>
+            <p id="improvedText_${essayIndex}" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line font-sans">${escapeHtml(ev.improved_answer)}</p>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    showToast(`Đã chấm điểm câu ${essayIndex}: ${score}/${maxScore} điểm!`, 'info');
+
+  } catch (err) {
+    resultDiv.innerHTML = `
+      <div class="p-4 bg-red-50 text-red-700 text-xs rounded-xl border border-red-200 flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation text-base"></i>
+        <span>${err.message || 'Lỗi khi chấm điểm bài tự luận. Vui lòng thử lại.'}</span>
+      </div>
+    `;
+    showToast(err.message || 'Chấm điểm thất bại.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-rotate-right mr-1.5"></i> Chấm điểm lại bài làm';
+  }
+}
+
+function copyImprovedAnswer(essayIndex) {
+  const el = document.getElementById(`improvedText_${essayIndex}`);
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText || el.textContent);
+  showToast('Đã sao chép bài làm mẫu vào clipboard!', 'info');
+}
+
+// Xử lý trắc nghiệm
+function selectQuizOption(qid, oi) {
+  if (isQuizSubmitted) return;
+  userQuizAnswers[qid] = oi;
+
+  const card = document.querySelector(`.quiz-question-card[data-qid="${qid}"]`);
+  if (!card) return;
+
+  const buttons = card.querySelectorAll('.quiz-option-btn');
+  buttons.forEach((btn, idx) => {
+    const badge = btn.querySelector('.option-badge');
+    if (idx === oi) {
+      btn.classList.add('border-primary', 'bg-teal-50', 'ring-2', 'ring-primary/20');
+      btn.classList.remove('border-slate-200');
+      if (badge) {
+        badge.classList.add('bg-primary', 'text-white', 'border-primary');
+        badge.classList.remove('text-slate-600', 'border-slate-300');
+      }
+    } else {
+      btn.classList.remove('border-primary', 'bg-teal-50', 'ring-2', 'ring-primary/20');
+      btn.classList.add('border-slate-200');
+      if (badge) {
+        badge.classList.remove('bg-primary', 'text-white', 'border-primary');
+        badge.classList.add('text-slate-600', 'border-slate-300');
+      }
+    }
+  });
+
+  const total = currentReviewSession?.quiz?.length || 0;
+  const answered = Object.keys(userQuizAnswers).length;
+  const progressEl = document.getElementById('quizProgressText');
+  if (progressEl) progressEl.textContent = `${answered} / ${total} câu`;
+}
+
+function submitQuiz() {
+  if (!currentReviewSession || !currentReviewSession.quiz) return;
+  if (isQuizSubmitted) {
+    showToast('Bạn đã nộp bài trắc nghiệm này rồi.', 'info');
+    return;
+  }
+
+  const quizList = currentReviewSession.quiz;
+  const total = quizList.length;
+  const answeredCount = Object.keys(userQuizAnswers).length;
+
+  if (answeredCount < total) {
+    if (!confirm(`Bạn mới trả lời ${answeredCount}/${total} câu hỏi. Bạn có chắc chắn muốn nộp bài trắc nghiệm ngay không?`)) {
+      return;
+    }
+  }
+
+  isQuizSubmitted = true;
+  let correctCount = 0;
+
+  quizList.forEach((q, idx) => {
+    const qid = q.id || idx + 1;
+    const card = document.querySelector(`.quiz-question-card[data-qid="${qid}"]`);
+    if (!card) return;
+
+    const chosenIdx = userQuizAnswers[qid];
+    const chosenLetter = chosenIdx !== undefined ? ['A', 'B', 'C', 'D'][chosenIdx] : null;
+    const correctLetter = (q.answer || '').trim()[0].toUpperCase();
+
+    const isCorrect = chosenLetter === correctLetter;
+    if (isCorrect) correctCount++;
+
+    const buttons = card.querySelectorAll('.quiz-option-btn');
+    buttons.forEach((btn, optIdx) => {
+      btn.disabled = true;
+      const letter = ['A', 'B', 'C', 'D'][optIdx];
+
+      if (letter === correctLetter) {
+        btn.classList.add('border-teal-500', 'bg-teal-50', 'text-teal-900', 'font-bold');
+      } else if (optIdx === chosenIdx && !isCorrect) {
+        btn.classList.add('border-red-400', 'bg-red-50', 'text-red-900');
+      }
+    });
+
+    const solBox = card.querySelector('.quiz-solution-box');
+    if (solBox) solBox.classList.remove('hidden');
+  });
+
+  const percentage = Math.round((correctCount / total) * 100);
+  const scoreCard = document.getElementById('quizScoreCard');
+
+  let rankText = 'Cần ôn lại kỹ các chủ đề chưa chính xác.';
+  let rankClass = 'text-amber-600';
+  if (percentage >= 85) {
+    rankText = 'Xuất sắc! Bạn đã làm chủ kiến thức các bài học ôn tập.';
+    rankClass = 'text-teal-600';
+  } else if (percentage >= 60) {
+    rankText = 'Khá tốt! Hãy đọc lại phần giải thích cho các câu bị sai.';
+    rankClass = 'text-blue-600';
+  }
+
+  if (scoreCard) {
+    scoreCard.innerHTML = `
+      <div class="max-w-md mx-auto">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full ${percentage >= 60 ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'} text-2xl font-black mb-3">
+          ${percentage}%
+        </div>
+        <h4 class="text-2xl font-black text-slate-900">Kết quả Trắc nghiệm: ${correctCount} / ${total} câu đúng</h4>
+        <p class="text-sm font-semibold mt-2 ${rankClass}">${rankText}</p>
+        <p class="text-xs text-slate-400 mt-2">Xem chi tiết đáp án và lời giải thích của từng câu hỏi bên dưới.</p>
+      </div>
+    `;
+    scoreCard.classList.remove('hidden');
+    scoreCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  const submitBtn = document.getElementById('btnSubmitQuiz');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đã nộp bài trắc nghiệm';
+    submitBtn.classList.replace('bg-teal-500', 'bg-slate-700');
+    submitBtn.classList.replace('text-slate-950', 'text-slate-300');
+  }
+
+  showToast(`Đã hoàn thành trắc nghiệm: ${correctCount}/${total} câu đúng!`, 'info');
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function showToast(msg, type = 'info') {
+  const colors = { error: 'bg-red-500', warning: 'bg-amber-500', info: 'bg-slate-900' };
+  const toast = document.createElement('div');
+  toast.className = `fixed bottom-5 right-5 ${colors[type] || colors.info} text-white px-5 py-3.5 rounded-2xl text-xs font-bold z-50 shadow-2xl flex items-center gap-2.5 transition-all`;
+  toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-xmark text-red-200' : type === 'warning' ? 'fa-triangle-exclamation text-amber-200' : 'fa-circle-check text-teal-300'} text-sm"></i> <span>${msg}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 4500);
+}
+</script>
+</body>
+</html>

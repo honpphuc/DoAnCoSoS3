@@ -28,6 +28,16 @@
             <i class="fa-regular fa-calendar-days w-5 <%= currentPath === '/schedule' ? 'text-primary' : 'text-slate-400 group-hover:text-primary' %>"></i>
             <span class="font-medium">Lịch học</span>
         </a>
+        <a href="/review" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all group <%= currentPath === '/review' ? 'sidebar-active' : 'hover:bg-slate-50 text-slate-600' %>">
+            <i class="fa-solid fa-brain w-5 <%= currentPath === '/review' ? 'text-primary' : 'text-slate-400 group-hover:text-primary' %>"></i>
+            <span class="font-medium">Ôn tập & Kiểm tra</span>
+            <span class="ml-auto text-[9px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full">Mới</span>
+        </a>
+        <a href="/game" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all group <%= currentPath === '/game' ? 'sidebar-active' : 'hover:bg-slate-50 text-slate-600' %>">
+            <i class="fa-solid fa-gamepad w-5 <%= currentPath === '/game' ? 'text-primary' : 'text-slate-400 group-hover:text-primary' %>"></i>
+            <span class="font-medium">Game Ôn Tập</span>
+            <span class="ml-auto text-[9px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-full">Vui nhộn</span>
+        </a>
         <a href="/profile" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all group <%= currentPath === '/profile' ? 'sidebar-active' : 'hover:bg-slate-50 text-slate-600' %>">
             <i class="fa-regular fa-id-badge w-5 <%= currentPath === '/profile' ? 'text-primary' : 'text-slate-400 group-hover:text-primary' %>"></i>
             <span class="font-medium">Hồ sơ cá nhân</span>

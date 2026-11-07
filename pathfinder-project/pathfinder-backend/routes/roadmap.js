@@ -1,22 +1,29 @@
 const express = require('express');
 const router = express.Router();
+const { createClient } = require('@supabase/supabase-js');
 const supabase = require('../lib/supabase');
 const { generateRoadmap } = require('../lib/gemini');
 
-// Đảm bảo profile tồn tại trước khi insert roadmap
-async function ensureProfile(user_id, email) {
-  const { data: existing } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('id', user_id)
-    .single();
+// Helper: Tạo Supabase client mang JWT token của user
+function getUserClient(req) {
+  const accessToken = req.session?.user?.access_token;
+  if (!accessToken) return supabase;
 
-  if (!existing) {
-    await supabase.from('profiles').insert({
-      id: user_id,
-      full_name: email?.split('@')[0] || 'User',
-    });
-  }
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_KEY || process.env.SUPABASE_SERVICE_KEY ||
+              process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  return createClient(url, key, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 }
 
 // POST /api/roadmap/generate
@@ -24,6 +31,7 @@ router.post('/generate', async (req, res) => {
   const { goal, level, hours_per_day } = req.body;
   const user_id = req.session?.user?.id;
   const email = req.session?.user?.email;
+  const db = getUserClient(req);
 
   if (!user_id) return res.status(401).json({ success: false, error: 'Bạn cần đăng nhập trước.' });
   if (!goal || !level || !hours_per_day) {
@@ -31,14 +39,17 @@ router.post('/generate', async (req, res) => {
   }
 
   try {
-    // Đảm bảo profile tồn tại
-    await ensureProfile(user_id, email);
+    // Đảm bảo profile tồn tại (dùng upsert với user client)
+    await db.from('profiles').upsert({
+      id: user_id,
+      full_name: email?.split('@')[0] || 'User',
+    }, { onConflict: 'id', ignoreDuplicates: true });
 
     // Tạo lộ trình
     const aiResult = await generateRoadmap(goal, level, hours_per_day);
 
     // Lưu roadmap
-    const { data: roadmap, error: roadmapError } = await supabase
+    const { data: roadmap, error: roadmapError } = await db
       .from('roadmaps')
       .insert({
         user_id,
@@ -71,12 +82,12 @@ router.post('/generate', async (req, res) => {
     }
 
     if (tasksToInsert.length > 0) {
-      const { error: taskError } = await supabase.from('tasks').insert(tasksToInsert);
+      const { error: taskError } = await db.from('tasks').insert(tasksToInsert);
       if (taskError) throw taskError;
     }
 
     // Cập nhật profile
-    await supabase.from('profiles').upsert({
+    await db.from('profiles').upsert({
       id: user_id,
       goal,
       level,
@@ -99,8 +110,10 @@ router.post('/generate', async (req, res) => {
 
 // GET /api/roadmap/:id
 router.get('/:id', async (req, res) => {
+  const db = getUserClient(req);
+
   try {
-    const { data: roadmap, error } = await supabase
+    const { data: roadmap, error } = await db
       .from('roadmaps')
       .select('*, tasks(*)')
       .eq('id', req.params.id)
@@ -117,8 +130,10 @@ router.get('/:id', async (req, res) => {
 
 // GET /api/roadmap/user/:user_id
 router.get('/user/:user_id', async (req, res) => {
+  const db = getUserClient(req);
+
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('roadmaps')
       .select('*')
       .eq('user_id', req.params.user_id)

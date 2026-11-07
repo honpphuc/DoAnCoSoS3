@@ -119,7 +119,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash-lite' });
 
     const context = `
 Bạn là trợ lý học tập Pathfinder AI.

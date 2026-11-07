@@ -1,56 +1,352 @@
 <%- include('partials/head') %>
-<header class="fixed top-0 left-0 w-full z-50 glass border-b border-white/20">
-    <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-compass"></i></div>
-                <span class="text-xl font-black text-slate-800 tracking-tighter">Pathfinder</span>
-        </div>
-        <nav class="hidden md:flex gap-10">
-            <a href="#tinh-nang" class="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Tính năng</a>
-            <a href="/about" class="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Về chúng tôi</a>
-            <a href="/login" class="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Đăng nhập</a>
-        </nav>
-        <a href="/onboarding" class="bg-primary text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-teal-100 hover:scale-105 transition-transform">Bắt đầu ngay</a>
+
+<!-- VIDEO MODAL -->
+<div id="demoModal" class="fixed inset-0 z-[999] hidden flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeDemoModal()"></div>
+  <div class="relative z-10 w-full max-w-3xl bg-black rounded-2xl overflow-hidden shadow-2xl">
+    <button onclick="closeDemoModal()" class="absolute top-3 right-3 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white transition">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="aspect-video">
+      <iframe id="demoFrame" width="100%" height="100%" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"
+        src="" class="w-full h-full"></iframe>
     </div>
+  </div>
+</div>
+
+<header class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
+  <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+    <a href="/" class="flex items-center gap-2.5">
+      <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white text-sm">
+        <i class="fa-solid fa-compass"></i>
+      </div>
+      <span class="text-lg font-black text-slate-900 tracking-tight">Pathfinder</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8">
+      <a href="#tinh-nang" class="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">Tính năng</a>
+      <a href="#ke-hoach" class="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">Kế hoạch</a>
+      <a href="/about" class="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">Về chúng tôi</a>
+      <a href="/login" class="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">Đăng nhập</a>
+    </nav>
+    <a href="/onboarding" class="bg-primary text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-teal-700 transition-colors">
+      Bắt đầu miễn phí
+    </a>
+  </div>
 </header>
 
-<section class="pt-40 pb-20 px-6">
-    <div class="max-w-4xl mx-auto text-center">
-        <span class="bg-teal-50 text-primary text-xs font-bold px-4 py-2 rounded-full border border-teal-100 mb-6 inline-block">CÁ NHÂN HÓA BỞI AI</span>
-        <h1 class="text-5xl md:text-7xl font-black text-slate-900 leading-tight mb-8">Kiến tạo lộ trình học tập thông minh</h1>
-        <p class="text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">Cá nhân hóa hành trình giáo dục của bạn với công nghệ AI tiên tiến. Giúp bạn đạt được mục tiêu nhanh hơn bao giờ hết.</p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/onboarding" class="bg-primary text-white px-10 py-4 rounded-2xl font-bold shadow-xl shadow-teal-100 hover:bg-teal-700 transition-all">Bắt đầu miễn phí</a>
-                <button class="bg-white border border-slate-200 px-10 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all">Xem bản Demo</button>
+<!-- HERO -->
+<section class="pt-28 pb-20 px-6 bg-white">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <!-- Left -->
+      <div>
+        <span class="inline-flex items-center gap-2 text-xs font-bold text-primary bg-teal-50 border border-teal-100 px-3 py-1.5 rounded-full mb-6">
+          <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
+          Nền tảng học tập cá nhân hoá
+        </span>
+        <h1 class="text-4xl lg:text-5xl xl:text-6xl font-black text-slate-900 leading-[1.1] mb-6">
+          Học đúng hướng,<br>
+          <span class="text-primary">đúng tốc độ</span><br>
+          của bạn.
+        </h1>
+        <p class="text-lg text-slate-500 mb-8 leading-relaxed max-w-lg">
+          Pathfinder phân tích mục tiêu và thói quen học tập của bạn để tạo ra lộ trình riêng — không phải template chung cho tất cả.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/onboarding" class="bg-primary text-white px-7 py-3.5 rounded-lg font-bold hover:bg-teal-700 transition-colors shadow-lg shadow-teal-100">
+            Tạo lộ trình của tôi
+          </a>
+          <button onclick="openDemoModal()" class="flex items-center gap-2 bg-white border border-slate-200 px-7 py-3.5 rounded-lg font-bold text-slate-700 hover:border-slate-300 transition-colors">
+            <i class="fa-solid fa-circle-play text-primary"></i>
+            Xem Demo
+          </button>
         </div>
+        <p class="text-xs text-slate-400 mt-4">Miễn phí • Không cần thẻ tín dụng • Tạo trong 2 phút</p>
+      </div>
+      <!-- Right: Dashboard Preview -->
+      <div class="relative">
+        <div class="bg-gradient-to-br from-teal-50 via-white to-blue-50 rounded-2xl p-6 border border-slate-100 shadow-xl">
+          <!-- Mini Dashboard Mockup -->
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 mb-3">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white text-xs">
+                <i class="fa-solid fa-compass"></i>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-slate-900">Pathfinder</p>
+                <p class="text-[10px] text-slate-400">Học tập thông minh</p>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-600 font-medium">Lộ trình IELTS Band 6.5</span>
+                <span class="text-primary font-bold">68%</span>
+              </div>
+              <div class="w-full bg-slate-100 h-2 rounded-full">
+                <div class="bg-primary h-2 rounded-full" style="width:68%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mb-3">
+            <div class="bg-blue-50 rounded-lg p-3 text-center">
+              <p class="text-lg font-black text-blue-600">24</p>
+              <p class="text-[10px] text-slate-500">Bài hoàn thành</p>
+            </div>
+            <div class="bg-teal-50 rounded-lg p-3 text-center">
+              <p class="text-lg font-black text-primary">35</p>
+              <p class="text-[10px] text-slate-500">Tổng bài</p>
+            </div>
+            <div class="bg-orange-50 rounded-lg p-3 text-center">
+              <p class="text-lg font-black text-orange-500">7</p>
+              <p class="text-[10px] text-slate-500">Ngày streak</p>
+            </div>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3">
+            <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Hôm nay · 3 bài</p>
+            <div class="space-y-1.5">
+              <div class="flex items-center gap-2 text-xs">
+                <div class="w-4 h-4 bg-primary rounded flex items-center justify-center"><i class="fa-solid fa-check text-white text-[8px]"></i></div>
+                <span class="text-slate-400 line-through">Listening Section 1</span>
+              </div>
+              <div class="flex items-center gap-2 text-xs">
+                <div class="w-4 h-4 border-2 border-primary rounded"></div>
+                <span class="text-slate-700 font-medium">Từ vựng học thuật AWL</span>
+              </div>
+              <div class="flex items-center gap-2 text-xs">
+                <div class="w-4 h-4 border-2 border-slate-200 rounded"></div>
+                <span class="text-slate-400">Writing Task 1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Floating badges -->
+        <div class="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg border border-slate-100 px-4 py-2.5 text-xs font-bold text-slate-700">
+          <i class="fa-solid fa-robot text-primary mr-1.5"></i>AI tạo lộ trình
+        </div>
+        <div class="absolute -bottom-4 -left-4 bg-primary text-white rounded-xl shadow-lg px-4 py-2.5 text-xs font-bold">
+          <i class="fa-solid fa-fire mr-1.5"></i>7 ngày liên tiếp 🔥
+        </div>
+      </div>
     </div>
-    
-    <div class="mt-20 max-w-5xl mx-auto">
-        <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=2070" class="w-full h-[500px] object-cover rounded-[3rem] shadow-2xl border-8 border-white">
-    </div>
+  </div>
 </section>
 
-<section id="tinh-nang" class="py-20 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-6">
-        <div class="grid md:grid-cols-3 gap-10">
-            <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
-                <div class="w-14 h-14 bg-teal-50 text-primary rounded-2xl flex items-center justify-center mb-6"><i class="fa-solid fa-map-location-dot text-2xl"></i></div>
-                <h3 class="text-xl font-bold mb-4">Lộ trình cá nhân</h3>
-                <p class="text-slate-500 text-sm leading-relaxed">AI phân tích lỗ hổng kiến thức và phong cách học của bạn để thiết kế lộ trình duy nhất dành riêng cho bạn.</p>
-            </div>
-            <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
-                <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6"><i class="fa-solid fa-chart-pie text-2xl"></i></div>
-                <h3 class="text-xl font-bold mb-4">Theo dõi tiến độ</h3>
-                <p class="text-slate-500 text-sm leading-relaxed">Trực quan hóa thành công của bạn với các biểu đồ thời gian thực, giúp bạn duy trì động lực mỗi ngày.</p>
-            </div>
-            <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
-                <div class="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-6"><i class="fa-solid fa-calendar-check text-2xl"></i></div>
-                <h3 class="text-xl font-bold mb-4">Lịch học thông minh</h3>
-                <p class="text-slate-500 text-sm leading-relaxed">Tự động sắp xếp lịch dựa trên thói quen sinh hoạt và mức độ ưu tiên của các môn học.</p>
-            </div>
-        </div>
+<!-- FEATURES -->
+<section id="tinh-nang" class="py-24 bg-slate-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-2xl mb-14">
+      <p class="text-xs font-bold text-primary uppercase tracking-widest mb-3">Tính năng</p>
+      <h2 class="text-3xl font-black text-slate-900 leading-tight">Không chỉ là ứng dụng nhắc nhở học bài</h2>
+      <p class="text-slate-500 mt-3">Pathfinder xây dựng hệ thống học tập cá nhân — từ lộ trình, lịch học đến tài liệu ôn tập.</p>
     </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Feature 1 -->
+      <div class="bg-white rounded-xl p-8 border border-slate-100">
+        <div class="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center mb-5">
+          <i class="fa-solid fa-route text-primary"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">Lộ trình riêng biệt cho từng người</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Dựa vào mục tiêu, trình độ hiện tại và quỹ thời gian, hệ thống tạo ra lộ trình học tập theo tuần — không phải copy từ template có sẵn.</p>
+      </div>
+      <!-- Feature 2 -->
+      <div class="bg-white rounded-xl p-8 border border-slate-100">
+        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mb-5">
+          <i class="fa-regular fa-calendar-days text-blue-500"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">Lịch học tự động theo tuần</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Mỗi buổi học được phân bổ đúng ngày trong tuần, có thể xem và theo dõi trực quan. Click vào buổi học để xem chi tiết và bắt đầu ngay.</p>
+      </div>
+      <!-- Feature 3: AI Review Docs -->
+      <div class="bg-primary text-white rounded-xl p-8 md:col-span-2">
+        <div class="flex flex-col md:flex-row md:items-center gap-8">
+          <div class="flex-1">
+            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-5">
+              <i class="fa-solid fa-brain text-white"></i>
+            </div>
+            <span class="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-full uppercase tracking-wide mb-3 inline-block">Mới</span>
+            <h3 class="text-xl font-bold mb-2">AI sinh tài liệu ôn tập & bài kiểm tra</h3>
+            <p class="text-teal-100 text-sm leading-relaxed mb-5">Dựa trên kế hoạch học tập và thời gian thi, Pathfinder tự động tạo tài liệu ôn tập tóm tắt và bộ câu hỏi kiểm tra có đáp án — giúp bạn ôn thi hiệu quả hơn.</p>
+            <a href="/onboarding" class="inline-block bg-white text-primary px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-teal-50 transition-colors">
+              Thử ngay →
+            </a>
+          </div>
+          <div class="md:w-72 bg-white/10 rounded-xl p-5 space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-xs"><i class="fa-solid fa-file-lines text-white"></i></div>
+              <div><p class="text-sm font-bold">Tóm tắt bài học theo tuần</p><p class="text-[11px] text-teal-200">Bullet points trọng tâm</p></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-xs"><i class="fa-solid fa-circle-question text-white"></i></div>
+              <div><p class="text-sm font-bold">Bộ câu hỏi ôn tập</p><p class="text-[11px] text-teal-200">Trắc nghiệm & tự luận</p></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-xs"><i class="fa-solid fa-clock-rotate-left text-white"></i></div>
+              <div><p class="text-sm font-bold">Lịch ôn thi tự động</p><p class="text-[11px] text-teal-200">Dựa trên ngày thi thật</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
+
+<!-- DEPLOYMENT PLAN -->
+<section id="ke-hoach" class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-2xl mb-14">
+      <p class="text-xs font-bold text-primary uppercase tracking-widest mb-3">Kế hoạch triển khai</p>
+      <h2 class="text-3xl font-black text-slate-900">Lộ trình phát triển dự án</h2>
+      <p class="text-slate-500 mt-3">Chi tiết 4 giai đoạn phát triển với phân công rõ ràng cho từng thành viên nhóm.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-5">
+      <!-- Phase 1 -->
+      <div class="border border-slate-100 rounded-xl p-6">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-black text-sm shrink-0">01</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <h3 class="font-bold text-slate-900">Nền tảng & Xác thực</h3>
+              <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Tuần 1–2</span>
+            </div>
+            <p class="text-sm text-slate-500 mb-3">Thiết lập hạ tầng, xác thực người dùng và cấu trúc database cơ bản.</p>
+            <div class="space-y-1.5">
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i><span>Setup Express + Supabase + EJS</span></div>
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i><span>Đăng ký / Đăng nhập / Session</span></div>
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i><span>Schema: users, profiles, roadmaps, tasks</span></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-3"><i class="fa-solid fa-user mr-1"></i>Backend Dev · <i class="fa-solid fa-database ml-1 mr-1"></i>DB Designer</p>
+          </div>
+        </div>
+      </div>
+      <!-- Phase 2 -->
+      <div class="border border-slate-100 rounded-xl p-6">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-teal-50 text-primary rounded-lg flex items-center justify-center font-black text-sm shrink-0">02</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <h3 class="font-bold text-slate-900">Lộ trình AI & Giao diện</h3>
+              <span class="text-[10px] font-bold bg-teal-50 text-primary px-2 py-0.5 rounded-full">Tuần 3–5</span>
+            </div>
+            <p class="text-sm text-slate-500 mb-3">Tích hợp logic tạo lộ trình, onboarding và dashboard chính.</p>
+            <div class="space-y-1.5">
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-primary mt-0.5"></i><span>Onboarding 3 bước (mục tiêu → cấp độ → thời gian)</span></div>
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-primary mt-0.5"></i><span>Template roadmap IELTS / Lập trình / Thiết kế</span></div>
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-primary mt-0.5"></i><span>Dashboard: tiến độ, streak, bài hôm nay</span></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-3"><i class="fa-solid fa-user mr-1"></i>Frontend Dev · <i class="fa-solid fa-robot ml-1 mr-1"></i>AI Integration</p>
+          </div>
+        </div>
+      </div>
+      <!-- Phase 3 -->
+      <div class="border border-slate-100 rounded-xl p-6">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center font-black text-sm shrink-0">03</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <h3 class="font-bold text-slate-900">Tài liệu & Ôn tập AI</h3>
+              <span class="text-[10px] font-bold bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full">Tuần 6–8</span>
+            </div>
+            <p class="text-sm text-slate-500 mb-3">Phát triển tính năng sinh tài liệu ôn tập và bộ đề kiểm tra tự động.</p>
+            <div class="space-y-1.5">
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-orange-500 mt-0.5"></i><span>API sinh tóm tắt bài học theo tuần</span></div>
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-orange-500 mt-0.5"></i><span>Bộ câu hỏi ôn tập (trắc nghiệm + tự luận)</span></div>
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-orange-500 mt-0.5"></i><span>Lịch ôn thi thông minh dựa trên ngày thi</span></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-3"><i class="fa-solid fa-user mr-1"></i>AI Dev · <i class="fa-solid fa-pen ml-1 mr-1"></i>Content Designer</p>
+          </div>
+        </div>
+      </div>
+      <!-- Phase 4 -->
+      <div class="border border-slate-100 rounded-xl p-6">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center font-black text-sm shrink-0">04</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <h3 class="font-bold text-slate-900">Hoàn thiện & Deploy</h3>
+              <span class="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">Tuần 9–10</span>
+            </div>
+            <p class="text-sm text-slate-500 mb-3">Kiểm thử toàn diện, tối ưu hiệu năng và triển khai sản phẩm.</p>
+            <div class="space-y-1.5">
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-purple-500 mt-0.5"></i><span>Unit test & E2E test các tính năng cốt lõi</span></div>
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-purple-500 mt-0.5"></i><span>Deploy lên Railway / Render + Supabase Cloud</span></div>
+              <div class="flex items-start gap-2 text-xs text-slate-600"><i class="fa-solid fa-check text-purple-500 mt-0.5"></i><span>Demo presentation & báo cáo đồ án</span></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-3"><i class="fa-solid fa-users mr-1"></i>Toàn nhóm · <i class="fa-solid fa-graduation-cap ml-1 mr-1"></i>Kiểm thử & Báo cáo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="py-20 bg-slate-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <p class="text-xs font-bold text-primary uppercase tracking-widest mb-3">Phản hồi</p>
+      <h2 class="text-2xl font-black text-slate-900">Người học nói gì về Pathfinder?</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-xl p-6 border border-slate-100">
+        <div class="flex items-center gap-1 text-amber-400 mb-4 text-sm">★★★★★</div>
+        <p class="text-slate-700 text-sm leading-relaxed mb-5">"Trước đây mình học theo phong trào, không có kế hoạch rõ. Pathfinder giúp mình biết chính xác hôm nay cần học gì — rất khác với những app nhắc nhở thông thường."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center text-sm font-bold text-primary">TH</div>
+          <div><p class="text-sm font-bold text-slate-800">Thanh Hương</p><p class="text-xs text-slate-400">Sinh viên năm 3 · IELTS 6.5</p></div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl p-6 border border-slate-100">
+        <div class="flex items-center gap-1 text-amber-400 mb-4 text-sm">★★★★★</div>
+        <p class="text-slate-700 text-sm leading-relaxed mb-5">"Mình thích nhất tính năng tài liệu gợi ý theo từng bài học. Không cần phải Google mỗi ngày nữa, mọi thứ đều được sắp xếp sẵn."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600">MK</div>
+          <div><p class="text-sm font-bold text-slate-800">Minh Khôi</p><p class="text-xs text-slate-400">Fresher Dev · Đang học ReactJS</p></div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl p-6 border border-slate-100">
+        <div class="flex items-center gap-1 text-amber-400 mb-4 text-sm">★★★★☆</div>
+        <p class="text-slate-700 text-sm leading-relaxed mb-5">"Giao diện gọn gàng, dễ dùng. Streak 14 ngày giúp mình duy trì thói quen học Figma mà không cần ai nhắc nhở cả."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-orange-100 rounded-full flex items-center justify-center text-sm font-bold text-orange-600">PL</div>
+          <div><p class="text-sm font-bold text-slate-800">Phương Linh</p><p class="text-xs text-slate-400">UI Designer intern</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 bg-primary">
+  <div class="max-w-3xl mx-auto px-6 text-center">
+    <h2 class="text-3xl font-black text-white mb-4">Sẵn sàng học đúng hướng chưa?</h2>
+    <p class="text-teal-100 mb-8">Tạo lộ trình cá nhân trong vòng 2 phút. Hoàn toàn miễn phí.</p>
+    <a href="/onboarding" class="inline-block bg-white text-primary px-10 py-4 rounded-lg font-black hover:bg-teal-50 transition-colors shadow-xl">
+      Bắt đầu ngay →
+    </a>
+  </div>
+</section>
+
 <%- include('partials/footer', { withSidebar: false }) %>
+
+<script>
+function openDemoModal() {
+  const modal = document.getElementById('demoModal');
+  const frame = document.getElementById('demoFrame');
+  // Replace this URL with actual demo video embed URL
+  frame.src = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1';
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeDemoModal() {
+  const modal = document.getElementById('demoModal');
+  const frame = document.getElementById('demoFrame');
+  frame.src = '';
+  modal.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDemoModal(); });
+</script>
 </body>
 </html>

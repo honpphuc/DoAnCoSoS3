@@ -1,6 +1,26 @@
 const express = require('express');
 const router = express.Router();
+const { createClient } = require('@supabase/supabase-js');
 const supabase = require('../lib/supabase');
+
+// Helper: Tạo Supabase client với user token (để RLS nhận auth.uid())
+function createUserClient(accessToken) {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_KEY || process.env.SUPABASE_SERVICE_KEY ||
+              process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  return createClient(url, key, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
 
 // POST /auth/login
 // Form trong login.ejs gửi lên: email, password
@@ -18,27 +38,32 @@ router.post('/login', async (req, res) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
+      console.error('Login Supabase error:', error.message);
       return res.render('login', {
         currentPath: '/login',
         error: 'Email hoặc mật khẩu không đúng.',
       });
     }
 
+    // Lưu session
     req.session.user = {
       id: data.user.id,
       email: data.user.email,
       access_token: data.session.access_token,
     };
 
-    const { data: profile } = await supabase
+    // Tạo client với JWT của user để RLS cho phép query
+    const userClient = createUserClient(data.session.access_token);
+
+    const { data: profile } = await userClient
       .from('profiles')
       .select('*')
       .eq('id', data.user.id)
-      .single();
+      .maybeSingle();
 
     req.session.profile = profile || null;
 
-    const { data: roadmap } = await supabase
+    const { data: roadmap } = await userClient
       .from('roadmaps')
       .select('id')
       .eq('user_id', data.user.id)
@@ -80,9 +105,23 @@ router.post('/register', async (req, res) => {
 
   try {
     console.log('Attempting signup with email:', email);
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    
+    // Truyền full_name vào user_metadata → trigger on_auth_user_created sẽ đọc
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: full_name,
+        },
+      },
+    });
 
-    console.log('Supabase signUp response - error:', error, 'data:', data);
+    console.log('Supabase signUp response - error:', error, 'data:', {
+      userId: data?.user?.id,
+      hasSession: !!data?.session,
+      identities: data?.user?.identities?.length,
+    });
 
     // Nếu có lỗi thực sự → báo lỗi
     if (error) {
@@ -90,8 +129,15 @@ router.post('/register', async (req, res) => {
       return res.render('login', { error: error.message || 'Đăng ký thất bại. Vui lòng thử lại.' });
     }
 
-    // Nếu user null → đang chờ xác nhận email (bình thường nếu email confirmation enabled)
-    if (!data?.user?.id) {
+    // Kiểm tra: nếu user tồn tại nhưng không có identities → email đã được sử dụng
+    if (data?.user && data.user.identities && data.user.identities.length === 0) {
+      return res.render('login', {
+        error: 'Email này đã được đăng ký. Vui lòng đăng nhập.',
+      });
+    }
+
+    // Nếu user null hoặc không có session → đang chờ xác nhận email
+    if (!data?.user?.id || !data?.session) {
       console.log('User registered but awaiting email confirmation');
       return res.render('login', { 
         error: 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.',
@@ -99,15 +145,8 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Nếu có user → tạo profile và đăng nhập luôn
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: data.user.id,
-      full_name,
-    });
-
-    if (profileError) {
-      console.error('Profile insert error:', profileError);
-    }
+    // Profile được tạo tự động bởi database trigger (on_auth_user_created)
+    // Không cần insert thủ công từ server nữa
 
     req.session.user = {
       id: data.user.id,

@@ -8,6 +8,28 @@ const supabase = require('./lib/supabase');
 
 const app = express();
 
+// Helper: Tạo Supabase client mang JWT token của user (để RLS hoạt động)
+function getUserClient(req) {
+  const accessToken = req.session?.user?.access_token;
+  if (!accessToken) return supabase; // fallback
+
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_KEY || process.env.SUPABASE_SERVICE_KEY ||
+              process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  return createClient(url, key, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
 app.set('views', path.join(__dirname, '..', 'views'));
 app.set('view engine', 'ejs');
 
@@ -27,8 +49,9 @@ function requireAuth(req, res, next) {
   next();
 }
 
-async function getCurrentRoadmapId(userId) {
-  const { data } = await supabase
+async function getCurrentRoadmapId(userId, client) {
+  const db = client || supabase;
+  const { data } = await db
     .from('roadmaps')
     .select('id')
     .eq('user_id', userId)
@@ -90,6 +113,8 @@ app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/resources', require('./routes/resources'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/auto-complete', require('./routes/autocomplete'));
+app.use('/api/review', require('./routes/review'));
+app.use('/api/game', require('./routes/game'));
 
 app.get('/', (req, res) => {
   res.render('landing', {
@@ -132,14 +157,15 @@ app.get('/onboarding', requireAuth, (req, res) => {
 
 app.get('/dashboard', requireAuth, async (req, res) => {
   const userId = req.session.user.id;
+  const db = getUserClient(req);
 
   try {
-    const roadmapId = await getCurrentRoadmapId(userId);
+    const roadmapId = await getCurrentRoadmapId(userId, db);
     if (!roadmapId) return res.redirect('/onboarding');
 
     const todayLabel = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()];
 
-    const { data: rawTodayTasks } = await supabase
+    const { data: rawTodayTasks } = await db
       .from('tasks')
       .select('*')
       .eq('roadmap_id', roadmapId);
@@ -147,7 +173,7 @@ app.get('/dashboard', requireAuth, async (req, res) => {
     const todayTasks = sortTasksByWeekAndDay(rawTodayTasks || [])
       .filter(t => normalizeDay(t.day_label) === todayLabel);
 
-    const { data: allTasks } = await supabase
+    const { data: allTasks } = await db
       .from('tasks')
       .select('id, is_completed')
       .eq('roadmap_id', roadmapId);
@@ -156,13 +182,13 @@ app.get('/dashboard', requireAuth, async (req, res) => {
     const done = allTasks?.filter(t => t.is_completed).length || 0;
     const percent = total > 0 ? Math.round((done / total) * 100) : 0;
 
-    const { data: roadmap } = await supabase
+    const { data: roadmap } = await db
       .from('roadmaps')
       .select('title, goal, total_weeks')
       .eq('id', roadmapId)
       .single();
 
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from('profiles')
       .select('full_name, goal, level')
       .eq('id', userId)
@@ -200,18 +226,19 @@ app.get('/dashboard', requireAuth, async (req, res) => {
 
 app.get('/roadmap', requireAuth, async (req, res) => {
   const userId = req.session.user.id;
+  const db = getUserClient(req);
 
   try {
-    const roadmapId = await getCurrentRoadmapId(userId);
+    const roadmapId = await getCurrentRoadmapId(userId, db);
     if (!roadmapId) return res.redirect('/onboarding');
 
-    const { data: roadmap } = await supabase
+    const { data: roadmap } = await db
       .from('roadmaps')
       .select('*')
       .eq('id', roadmapId)
       .single();
 
-    const { data: rawTasks } = await supabase
+    const { data: rawTasks } = await db
       .from('tasks')
       .select('*')
       .eq('roadmap_id', roadmapId)
@@ -278,18 +305,19 @@ app.get('/roadmap', requireAuth, async (req, res) => {
 
 app.get('/schedule', requireAuth, async (req, res) => {
   const userId = req.session.user.id;
+  const db = getUserClient(req);
 
   try {
-    const roadmapId = await getCurrentRoadmapId(userId);
+    const roadmapId = await getCurrentRoadmapId(userId, db);
     if (!roadmapId) return res.redirect('/onboarding');
 
-    const { data: roadmap } = await supabase
+    const { data: roadmap } = await db
       .from('roadmaps')
       .select('*')
       .eq('id', roadmapId)
       .single();
 
-    const { data: rawTasks } = await supabase
+    const { data: rawTasks } = await db
       .from('tasks')
       .select('*')
       .eq('roadmap_id', roadmapId)
@@ -342,8 +370,10 @@ app.get('/schedule', requireAuth, async (req, res) => {
 });
 
 app.get('/lesson/:task_id', requireAuth, async (req, res) => {
+  const db = getUserClient(req);
+
   try {
-    const { data: task } = await supabase
+    const { data: task } = await db
       .from('tasks')
       .select('*')
       .eq('id', req.params.task_id)
@@ -351,13 +381,13 @@ app.get('/lesson/:task_id', requireAuth, async (req, res) => {
 
     if (!task) return res.redirect('/dashboard');
 
-    const { data: roadmap } = await supabase
+    const { data: roadmap } = await db
       .from('roadmaps')
       .select('id, title, goal')
       .eq('id', task.roadmap_id)
       .single();
 
-    const { data: rawSiblingTasks } = await supabase
+    const { data: rawSiblingTasks } = await db
       .from('tasks')
       .select('id, topic, week_number, day_label')
       .eq('roadmap_id', task.roadmap_id)
@@ -390,17 +420,18 @@ app.get('/lesson/:task_id', requireAuth, async (req, res) => {
 
 app.get('/profile', requireAuth, async (req, res) => {
   const userId = req.session.user.id;
+  const db = getUserClient(req);
 
   try {
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from('profiles')
       .select('*')
       .eq('id', userId)
       .maybeSingle();
 
-    const roadmapId = await getCurrentRoadmapId(userId);
+    const roadmapId = await getCurrentRoadmapId(userId, db);
 
-    const { data: allTasks } = roadmapId ? await supabase
+    const { data: allTasks } = roadmapId ? await db
       .from('tasks')
       .select('id, is_completed, completed_at, week_number')
       .eq('roadmap_id', roadmapId) : { data: [] };
@@ -408,7 +439,7 @@ app.get('/profile', requireAuth, async (req, res) => {
     const total = allTasks?.length || 0;
     const done = allTasks?.filter(t => t.is_completed).length || 0;
 
-    const { data: roadmap } = roadmapId ? await supabase
+    const { data: roadmap } = roadmapId ? await db
       .from('roadmaps')
       .select('title, goal, total_weeks, created_at')
       .eq('id', roadmapId)
@@ -438,11 +469,131 @@ app.get('/profile', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/settings', requireAuth, async (req, res) => {
+app.get('/review', requireAuth, async (req, res) => {
   const userId = req.session.user.id;
+  const db = getUserClient(req);
 
   try {
-    const { data: profile } = await supabase
+    const roadmapId = await getCurrentRoadmapId(userId, db);
+    if (!roadmapId) return res.redirect('/onboarding');
+
+    const { data: roadmap } = await db
+      .from('roadmaps')
+      .select('*')
+      .eq('id', roadmapId)
+      .single();
+
+    const { data: rawTasks } = await db
+      .from('tasks')
+      .select('*')
+      .eq('roadmap_id', roadmapId)
+      .order('week_number', { ascending: true });
+
+    const allTasks = sortTasksByWeekAndDay(rawTasks || []);
+
+    // Group into weeks for the selector
+    const weekMap = {};
+    for (const task of allTasks) {
+      if (!weekMap[task.week_number]) {
+        weekMap[task.week_number] = {
+          week: task.week_number,
+          theme: task.week_theme || `Tuần ${task.week_number}`,
+          tasks: [],
+        };
+      }
+      weekMap[task.week_number].tasks.push({
+        ...task,
+        day_text: DAY_LABELS[normalizeDay(task.day_label)] || task.day_label,
+      });
+    }
+    const weeks = Object.values(weekMap).sort((a, b) => Number(a.week) - Number(b.week));
+
+    res.render('review', {
+      currentPath: '/review',
+      user: req.session.user,
+      roadmap: roadmap || {},
+      roadmapId,
+      weeks,
+    });
+
+  } catch (err) {
+    console.error('Review page error:', err);
+    res.render('review', {
+      currentPath: '/review',
+      user: req.session.user,
+      roadmap: {},
+      roadmapId: null,
+      weeks: [],
+    });
+  }
+});
+
+app.get('/game', requireAuth, async (req, res) => {
+  const userId = req.session.user.id;
+  const db = getUserClient(req);
+
+  try {
+    const roadmapId = await getCurrentRoadmapId(userId, db);
+    if (!roadmapId) return res.redirect('/onboarding');
+
+    const { data: roadmap } = await db
+      .from('roadmaps')
+      .select('*')
+      .eq('id', roadmapId)
+      .single();
+
+    const { data: rawTasks } = await db
+      .from('tasks')
+      .select('*')
+      .eq('roadmap_id', roadmapId)
+      .order('week_number', { ascending: true });
+
+    const allTasks = sortTasksByWeekAndDay(rawTasks || []);
+
+    const weekMap = {};
+    for (const task of allTasks) {
+      if (!weekMap[task.week_number]) {
+        weekMap[task.week_number] = {
+          week: task.week_number,
+          theme: task.week_theme || `Tuần ${task.week_number}`,
+          tasks: [],
+        };
+      }
+      weekMap[task.week_number].tasks.push({
+        ...task,
+        day_text: DAY_LABELS[normalizeDay(task.day_label)] || task.day_label,
+      });
+    }
+    const weeks = Object.values(weekMap).sort((a, b) => Number(a.week) - Number(b.week));
+
+    res.render('game', {
+      currentPath: '/game',
+      user: req.session.user,
+      roadmap: roadmap || {},
+      roadmapId,
+      weeks,
+      allTasks,
+    });
+
+  } catch (err) {
+    console.error('Game page error:', err);
+    res.render('game', {
+      currentPath: '/game',
+      user: req.session.user,
+      roadmap: {},
+      roadmapId: null,
+      weeks: [],
+      allTasks: [],
+    });
+  }
+});
+
+app.get('/settings', requireAuth, async (req, res) => {
+  const userId = req.session.user.id;
+  const db = getUserClient(req);
+
+  try {
+    const { data: profile } = await db
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -467,6 +618,7 @@ app.get('/settings', requireAuth, async (req, res) => {
 app.post('/api/settings/profile', requireAuth, async (req, res) => {
   const userId = req.session.user.id;
   const { full_name, headline } = req.body;
+  const db = getUserClient(req);
 
   if (!full_name) {
     return res.status(400).json({
@@ -476,7 +628,7 @@ app.post('/api/settings/profile', requireAuth, async (req, res) => {
   }
 
   try {
-    const { error } = await supabase
+    const { error } = await db
       .from('profiles')
       .upsert({
         id: userId,

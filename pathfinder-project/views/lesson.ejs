@@ -49,8 +49,8 @@
                     <div class="flex items-center justify-between gap-4 mb-4">
                         <h2 class="text-xl font-bold">Tài liệu tham khảo</h2>
                         <button id="suggestBtn"
-                                class="bg-primary text-white px-4 py-2 rounded-xl font-semibold hover:bg-primary/90 transition-all">
-                            Xem đề xuất
+                                class="flex items-center gap-1.5 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-all">
+                          <i class="fa-solid fa-lightbulb"></i> Xem gợi ý
                         </button>
                     </div>
 
@@ -112,78 +112,152 @@
 
 <script>
 async function markDone(taskId, currentState) {
-    const newState = !currentState;
-
-    await fetch('/api/tasks/' + taskId + '/complete', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_completed: newState }),
+  const newState = !currentState;
+  const btn = document.getElementById('doneBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang cập nhật...';
+  try {
+    const res = await fetch('/api/tasks/' + taskId + '/complete', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_completed: newState }),
     });
-
+    if (!res.ok) throw new Error('Server error');
     location.reload();
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = '<%= task.is_completed ? "✓ Đã hoàn thành" : "Đánh dấu hoàn thành" %>';
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-bold z-50 shadow-lg';
+    toast.textContent = 'Lỗi kết nối. Thử lại sau.';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+}
+
+function extractYoutubeId(url) {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
 }
 
 const suggestBtn = document.getElementById('suggestBtn');
 
 suggestBtn?.addEventListener('click', async () => {
-    const btn = suggestBtn;
-    const container = document.getElementById('resourceList');
+  const btn = suggestBtn;
+  const container = document.getElementById('resourceList');
 
-    const topic = <%- JSON.stringify(task.topic || '') %>;
-    const goal = <%- JSON.stringify(typeof roadmap !== 'undefined' && roadmap ? roadmap.goal || '' : '') %>;
+  const topic = <%- JSON.stringify(task.topic || '') %>;
+  const goal = <%- JSON.stringify(typeof roadmap !== 'undefined' && roadmap ? roadmap.goal || '' : '') %>;
 
-    btn.innerHTML = 'Đang tải...';
-    container.innerHTML = '<p class="text-sm text-slate-400">Đang tìm tài liệu phù hợp...</p>';
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tải...';
 
-    try {
-        const res = await fetch('/api/resources/suggest', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                topic,
-                level: 'beginner',
-                goal,
-            }),
-        });
+  // Show skeleton loader
+  container.innerHTML = `
+    <div class="animate-pulse space-y-3">
+      <div class="h-20 bg-slate-100 rounded-xl"></div>
+      <div class="h-20 bg-slate-100 rounded-xl"></div>
+      <div class="h-16 bg-slate-100 rounded-xl"></div>
+    </div>
+  `;
 
-        const data = await res.json();
-        const resources = data.data || [];
+  try {
+    const res = await fetch('/api/resources/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, level: 'beginner', goal }),
+    });
 
-        if (resources.length === 0) {
-            const searchUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(topic + ' bài giảng');
-            container.innerHTML = `
-                <a href="${searchUrl}" target="_blank" rel="noopener"
-                   class="block p-4 rounded-2xl border border-slate-100 hover:border-primary transition-all">
-                    <span class="text-xs font-bold text-primary uppercase">Video</span>
-                    <p class="font-bold mt-1">Tìm bài giảng: ${topic}</p>
-                    <p class="text-xs text-slate-400 mt-1">Mở YouTube để xem bài giảng phù hợp.</p>
-                </a>
-            `;
-            return;
-        }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
 
-        container.innerHTML = resources.map((r) => {
-            const url = r.url || ('https://www.youtube.com/results?search_query=' + encodeURIComponent((r.title || topic) + ' bài giảng'));
-            const title = r.title || 'Tài liệu học tập';
-            const type = r.type || 'resource';
-            const label = type === 'video' ? 'Video' : type === 'practice' ? 'Bài thực hành' : 'Tài liệu';
-            const reason = r.reason || 'Phù hợp với bài học này.';
+    const data = await res.json();
+    const resources = data.data || [];
 
-            return `
-                <a href="${url}" target="_blank" rel="noopener"
-                   class="block p-4 rounded-2xl border border-slate-100 hover:border-primary transition-all">
-                    <span class="text-xs font-bold text-primary uppercase">${label}</span>
-                    <p class="font-bold mt-1">${title}</p>
-                    <p class="text-xs text-slate-400 mt-1">${reason}</p>
-                </a>
-            `;
-        }).join('');
-
-    } catch (err) {
-        container.innerHTML = '<p class="text-sm text-red-400">Không tải được tài liệu đề xuất.</p>';
-    } finally {
-        btn.innerHTML = 'Xem đề xuất';
+    if (resources.length === 0) {
+      // Fallback: show YouTube search
+      const searchUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(topic + ' bài giảng tiếng Việt');
+      container.innerHTML = `
+        <div class="border border-slate-100 rounded-xl p-4">
+          <div class="aspect-video bg-slate-900 rounded-lg flex items-center justify-center mb-3 relative overflow-hidden">
+            <a href="${searchUrl}" target="_blank" rel="noopener" class="absolute inset-0 flex flex-col items-center justify-center text-white gap-3">
+              <div class="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center">
+                <i class="fa-brands fa-youtube text-2xl"></i>
+              </div>
+              <p class="text-sm font-bold">Tìm bài giảng về: ${topic}</p>
+              <p class="text-xs text-white/60">Mở YouTube →</p>
+            </a>
+          </div>
+          <p class="text-xs text-slate-400">Chưa có tài liệu được lưu cho chủ đề này. Nhấn để tìm kiếm trên YouTube.</p>
+        </div>
+      `;
+      return;
     }
+
+    container.innerHTML = resources.map((r) => {
+      const url = r.url || ('https://www.youtube.com/results?search_query=' + encodeURIComponent((r.title || topic) + ' bài giảng'));
+      const title = r.title || 'Tài liệu học tập';
+      const type = r.type || 'resource';
+      const reason = r.reason || 'Phù hợp với bài học này.';
+      const ytId = type === 'video' ? extractYoutubeId(url) : null;
+
+      if (ytId) {
+        return `
+          <div class="border border-slate-100 rounded-xl overflow-hidden">
+            <div class="aspect-video bg-slate-900 relative">
+              <iframe src="https://www.youtube.com/embed/${ytId}" title="${title}"
+                frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                class="w-full h-full"></iframe>
+            </div>
+            <div class="p-4">
+              <span class="text-[10px] font-bold text-red-500 uppercase bg-red-50 px-2 py-0.5 rounded">YouTube</span>
+              <p class="font-bold text-slate-800 mt-1.5 text-sm">${title}</p>
+              <p class="text-xs text-slate-400 mt-1">${reason}</p>
+              <a href="${url}" target="_blank" rel="noopener" class="text-xs text-primary font-bold mt-2 inline-block hover:underline">Mở trên YouTube →</a>
+            </div>
+          </div>
+        `;
+      }
+
+      const label = type === 'practice' ? 'Bài thực hành' : type === 'article' ? 'Bài đọc' : 'Tài liệu';
+      const iconClass = type === 'practice' ? 'fa-dumbbell text-green-500' : 'fa-book-open text-blue-500';
+      return `
+        <a href="${url}" target="_blank" rel="noopener"
+           class="flex items-start gap-4 p-4 rounded-xl border border-slate-100 hover:border-primary hover:bg-teal-50/30 transition-all group">
+          <div class="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-white">
+            <i class="fa-solid ${iconClass}"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">${label}</span>
+            <p class="font-bold text-slate-800 text-sm mt-0.5 leading-snug">${title}</p>
+            <p class="text-xs text-slate-400 mt-1">${reason}</p>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square text-slate-300 group-hover:text-primary text-xs mt-1"></i>
+        </a>
+      `;
+    }).join('');
+
+  } catch (err) {
+    container.innerHTML = `
+      <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl">
+        <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+        <div>
+          <p class="text-sm font-bold text-red-600">Không tải được tài liệu</p>
+          <p class="text-xs text-red-400 mt-0.5">Kiểm tra kết nối và thử lại.</p>
+        </div>
+        <button onclick="document.getElementById('suggestBtn').click()" class="ml-auto text-xs text-red-500 font-bold hover:underline">Thử lại</button>
+      </div>
+    `;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-lightbulb mr-1"></i> Xem gợi ý';
+  }
 });
 </script>
 
